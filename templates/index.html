@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Simulation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Agent Simulation</h1>
+
+        <div class="row">
+            <!-- Left Column: Display Plot (taking up half the screen width) -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header text-center">Spatial Grid Layout</div>
+                    <div class="card-body text-center">
+                        <img src="data:image/png;base64,{{ plot_data }}" alt="Grid Plot" class="img-fluid rounded">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column: TV and Agent Selection Forms (taking up one-fourth of the screen width) -->
+            <div class="col-md-3 mb-4">
+                <!-- Add Television Form -->
+                <div class="card mb-4">
+                    <div class="card-header">Add Television</div>
+                    <div class="card-body">
+                        <form method="POST" action="/add_tv">
+                            <div class="form-group row">
+                                <label for="tv_x" class="col-sm-5 col-form-label">TV X-coordinate:</label>
+                                <div class="col-sm-7">
+                                    <input type="number" name="tv_x" id="tv_x" value="7" required class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="tv_y" class="col-sm-5 col-form-label">TV Y-coordinate:</label>
+                                <div class="col-sm-7">
+                                    <input type="number" name="tv_y" id="tv_y" value="7" required class="form-control">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">Add Television</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Add Agent Form -->
+                <div class="card mb-4">
+                    <div class="card-header">Add Agent</div>
+                    <div class="card-body">
+                        <form method="POST" action="/add_agent">
+                            <div class="form-group">
+                                <label for="name">Name:</label>
+                                <select name="name" id="name" required class="form-control">
+                                    <option value="" disabled selected>Select Registered Agent</option>
+                                    {% for name in agent_names %}
+                                    <option value="{{ name }}">{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="agent_x">Agent X-coordinate:</label>
+                                    <input type="number" name="agent_x" id="agent_x" value="7" required
+                                        class="form-control">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="agent_y">Agent Y-coordinate:</label>
+                                    <input type="number" name="agent_y" id="agent_y" value="7" required
+                                        class="form-control">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Add Agent</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Agent List (taking up one-fourth of the screen width) -->
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-header">Agent List</div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for agent in agents %}
+                            <li class="list-group-item">{{ agent.name }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Simulation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card {
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .form-check-label {
+            font-size: 1em;
+        }
+
+        .form-range {
+            background-color: #e9ecef;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 5px;
+            font-size: 1.1em;
+            padding: 10px 20px;
+        }
+
+        h2 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #343a40;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Agent Registration</h2>
+
+        <!-- Registration Form -->
+        <form method="POST" action="/submit/">
+
+            <!-- Section: Personal Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Personal Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Personality and Emotions Side by Side -->
+            <div class="row mb-4">
+                <!-- Personality Section -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4>Personality</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Extravertness Slider -->
+                            <div class="mb-3">
+                                <label for="Ex" class="form-label">Extravertness: <span id="ExValue">0.5</span></label>
+                                <div class="d-flex justify-content-between">
+                                    <span>0</span>
+                                    <span>1</span>
+                                </div>
+                                <input type="range" class="form-range w-100" id="Ex" name="Ex" min="0" max="1"
+                                    step="0.01" value="0.5"
+                                    oninput="document.getElementById('ExValue').innerText = this.value">
+                            </div>
+
+                            <!-- Openness Slider -->
+                            <div class="mb-3">
+                                <label for="Op" class="form-label">Openness: <span id="OpValue">0.5</span></label>
+                                <div class="d-flex justify-content-between">
+                                    <span>0</span>
+                                    <span>1</span>
+                                </div>
+                                <input type="range" class="form-range w-100" id="Op" name="Op" min="0" max="1"
+                                    step="0.01" value="0.5"
+                                    oninput="document.getElementById('OpValue').innerText = this.value">
+                            </div>
+
+                            <!-- Neuroticism Slider -->
+                            <div class="mb-3">
+                                <label for="Nu" class="form-label">Neuroticism: <span id="NuValue">0.5</span></label>
+                                <div class="d-flex justify-content-between">
+                                    <span>0</span>
+                                    <span>1</span>
+                                </div>
+                                <input type="range" class="form-range w-100" id="Nu" name="Nu" min="0" max="1"
+                                    step="0.01" value="0.5"
+                                    oninput="document.getElementById('NuValue').innerText = this.value">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emotions Section -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4>Emotions</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Happiness Slider -->
+                            <div class="mb-3">
+                                <label for="Ha" class="form-label">Happiness: <span id="HaValue">0.5</span></label>
+                                <div class="d-flex justify-content-between">
+                                    <span>0</span>
+                                    <span>1</span>
+                                </div>
+                                <input type="range" class="form-range w-100" id="Ha" name="Ha" min="0" max="1"
+                                    step="0.01" value="0.5"
+                                    oninput="document.getElementById('HaValue').innerText = this.value">
+                            </div>
+
+                            <!-- Sadness Slider -->
+                            <div class="mb-3">
+                                <label for="Sd" class="form-label">Sadness: <span id="SdValue">0.5</span></label>
+                                <div class="d-flex justify-content-between">
+                                    <span>0</span>
+                                    <span>1</span>
+                                </div>
+                                <input type="range" class="form-range w-100" id="Sd" name="Sd" min="0" max="1"
+                                    step="0.01" value="0.5"
+                                    oninput="document.getElementById('SdValue').innerText = this.value">
+                            </div>
+
+                            <!-- Fear Slider -->
+                            <div class="mb-3">
+                                <label for="Fe" class="form-label">Fear: <span id="FeValue">0.5</span></label>
+                                <div class="d-flex justify-content-between">
+                                    <span>0</span>
+                                    <span>1</span>
+                                </div>
+                                <input type="range" class="form-range w-100" id="Fe" name="Fe" min="0" max="1"
+                                    step="0.01" value="0.5"
+                                    oninput="document.getElementById('FeValue').innerText = this.value">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Section: Hobbies and Interests as Row of Cards -->
+            <div class="row mb-4">
+                <!-- Hobbies Section -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4>Hobbies</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="1" id="hob1" name="HobbArr">
+                                <label class="form-check-label" for="hob1">Cognitive</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="2" id="hob2" name="HobbArr">
+                                <label class="form-check-label" for="hob2">Cultural</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="3" id="hob3" name="HobbArr">
+                                <label class="form-check-label" for="hob3">Religious</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="4" id="hob4" name="HobbArr">
+                                <label class="form-check-label" for="hob4">Social</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="5" id="hob5" name="HobbArr">
+                                <label class="form-check-label" for="hob5">Gardening</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="6" id="hob6" name="HobbArr">
+                                <label class="form-check-label" for="hob6">Travelling</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interests Section -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4>Interests</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="1" id="int1" name="IntArr">
+                                <label class="form-check-label" for="int1">Realistic</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="2" id="int2" name="IntArr">
+                                <label class="form-check-label" for="int2">Investigating</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="3" id="int3" name="IntArr">
+                                <label class="form-check-label" for="int3">Artistic</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="4" id="int4" name="IntArr">
+                                <label class="form-check-label" for="int4">Social</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="5" id="int5" name="IntArr">
+                                <label class="form-check-label" for="int5">Enterprising</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" value="6" id="int6" name="IntArr">
+                                <label class="form-check-label" for="int6">Conventional</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Additional Information as Row of Cards -->
+            <div class="row mb-4">
+                <!-- Language Section -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Language</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="lang1" name="Language" value="1">
+                                <label class="form-check-label" for="lang1">English</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="lang2" name="Language" value="2">
+                                <label class="form-check-label" for="lang2">Malay</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="lang3" name="Language" value="3">
+                                <label class="form-check-label" for="lang3">Mandarin</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="lang4" name="Language" value="4">
+                                <label class="form-check-label" for="lang4">Tamil</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Race Section -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Race</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="race1" name="Race" value="1">
+                                <label class="form-check-label" for="race1">Malay</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="race2" name="Race" value="2">
+                                <label class="form-check-label" for="race2">Chinese</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="race3" name="Race" value="3">
+                                <label class="form-check-label" for="race3">Indian</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="race4" name="Race" value="4">
+                                <label class="form-check-label" for="race4">Others</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Religion Section -->
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5>Religion</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="rel1" name="Religion" value="1">
+                                <label class="form-check-label" for="religion1">Islam</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="rel2" name="Religion" value="2">
+                                <label class="form-check-label" for="religion2">Christianity</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="rel3" name="Religion" value="3">
+                                <label class="form-check-label" for="religion3">Buddhism</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="rel4" name="Religion" value="4">
+                                <label class="form-check-label" for="religion4">Hinduism</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary mt-4">Submit</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

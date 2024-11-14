@@ -6,90 +6,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Simulation</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            padding: 15px;
+        }
+
+        .card-header,
+        .card-body {
+            padding: 15px;
+        }
+
+        .form-group,
+        .list-group-item {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body class="bg-dark">
 
     <div class="container mt-5">
-        <h1 class="text-center mb-4">Agent Simulation</h1>
 
-        <div class="row">
-            <!-- Left Column: Display Plot (taking up half the screen width) -->
-            <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-header text-center">Spatial Grid Layout</div>
-                    <div class="card-body text-center">
-                        <img src="data:image/png;base64,{{ plot_data }}" alt="Grid Plot" class="img-fluid rounded">
-                    </div>
-                </div>
-            </div>
+        <div>
+            <h1 class="text-center mb-4 text-white">Stranger Social Interaction Catalyst (SSIC) Model</h1>
+            <p class="text-center mb-4 text-white">The combination of a curated engine, a crazy supervisor, a lesser-so
+                mental
+                supervisee, and a love for
+                theoretical artificial intelligence</p>
+            <br><br>
+        </div>
 
-            <!-- Middle Column: TV and Agent Selection Forms (taking up one-fourth of the screen width) -->
-            <div class="col-md-3 mb-4">
-                <!-- Add Television Form -->
-                <div class="card mb-4">
-                    <div class="card-header">Add Television</div>
-                    <div class="card-body">
-                        <form method="POST" action="/add_tv">
-                            <div class="form-group row">
-                                <label for="tv_x" class="col-sm-5 col-form-label">TV X-coordinate:</label>
-                                <div class="col-sm-7">
-                                    <input type="number" name="tv_x" id="tv_x" value="7" required class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="tv_y" class="col-sm-5 col-form-label">TV Y-coordinate:</label>
-                                <div class="col-sm-7">
-                                    <input type="number" name="tv_y" id="tv_y" value="7" required class="form-control">
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-success btn-block">Add Television</button>
-                        </form>
+        <div class="card">
+            <h1 class="text-center mb-4">Agent Simulation</h1>
+
+            <div class="row">
+                <!-- Left Column: Display Plot (taking up half the screen width) -->
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header text-center">Spatial Grid Layout</div>
+                        <div class="card-body text-center">
+                            <img src="data:image/png;base64,{{ plot_data }}" alt="Grid Plot" class="img-fluid rounded">
+                        </div>
                     </div>
                 </div>
 
-                <!-- Add Agent Form -->
-                <div class="card mb-4">
-                    <div class="card-header">Add Agent</div>
-                    <div class="card-body">
-                        <form method="POST" action="/add_agent">
-                            <div class="form-group">
-                                <label for="name">Name:</label>
-                                <select name="name" id="name" required class="form-control">
-                                    <option value="" disabled selected>Select Registered Agent</option>
-                                    {% for name in agent_names %}
-                                    <option value="{{ name }}">{{ name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="agent_x">Agent X-coordinate:</label>
-                                    <input type="number" name="agent_x" id="agent_x" value="7" required
-                                        class="form-control">
+                <!-- Middle Column: TV and Agent Selection Forms (taking up one-fourth of the screen width) -->
+                <div class="col-md-3 mb-4">
+                    <!-- Add Television Form -->
+                    <div class="card mb-4">
+                        <div class="card-header">Add Television</div>
+                        <div class="card-body">
+                            <form method="POST" action="/add_tv">
+                                <div class="form-group row">
+                                    <label for="tv_x" class="col-sm-5 col-form-label">TV X-coordinate:</label>
+                                    <div class="col-sm-7">
+                                        <input type="number" name="tv_x" id="tv_x" value="7" required
+                                            class="form-control">
+                                    </div>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label for="agent_y">Agent Y-coordinate:</label>
-                                    <input type="number" name="agent_y" id="agent_y" value="7" required
-                                        class="form-control">
+                                <div class="form-group row">
+                                    <label for="tv_y" class="col-sm-5 col-form-label">TV Y-coordinate:</label>
+                                    <div class="col-sm-7">
+                                        <input type="number" name="tv_y" id="tv_y" value="7" required
+                                            class="form-control">
+                                    </div>
                                 </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">Add Agent</button>
-                        </form>
+                                <button type="submit" class="btn btn-success btn-block">Add Television</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Add Agent Form -->
+                    <div class="card mb-4">
+                        <div class="card-header">Add Agent</div>
+                        <div class="card-body">
+                            <form method="POST" action="/add_agent/">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <select name="name" id="name" required class="form-control">
+                                        <option value="" disabled selected>Select Registered Agent</option>
+                                        {% for name in agent_names %}
+                                        <option value="{{ name }}">{{ name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="posX">Agent X-coordinate:</label>
+                                        <input type="number" name="posX" id="posX" value="7" required
+                                            class="form-control">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="posY">Agent Y-coordinate:</label>
+                                        <input type="number" name="posY" id="posY" value="7" required
+                                            class="form-control">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Add Agent</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Right Column: Agent List (taking up one-fourth of the screen width) -->
-            <div class="col-md-3 mb-4">
-                <div class="card">
-                    <div class="card-header">Agent List</div>
-                    <div class="card-body">
-                        <ul class="list-group">
-                            {% for agent in agents %}
-                            <li class="list-group-item">{{ agent.name }}</li>
-                            {% endfor %}
-                        </ul>
+                <!-- Right Column: Agent List (taking up one-fourth of the screen width) -->
+                <div class="col-md-3 mb-4">
+                    <div class="card">
+                        <div class="card-header">Agent List</div>
+                        <div class="card-body">
+                            <ul class="list-group">
+                                {% for agent in agents %}
+                                <li class="list-group-item">{{ agent.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

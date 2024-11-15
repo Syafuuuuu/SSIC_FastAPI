@@ -34,23 +34,6 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 tv_positions = []
 agents_list = []
 
-#Closest TV Function
-def find_closest_tv(agent_position, tvs_positions):
-    distances = np.linalg.norm(tvs_positions - agent_position, axis=1)
-    closest_tv_index = np.argmin(distances)  # Index of the closest TV
-    return closest_tv_index
-
-# Group agents based on the closest TV
-agents_grouped_by_tv = {i: [] for i in range(len(tv_positions))}
-
-for i, agent_position in enumerate(agents_positions):
-    closest_tv_index = find_closest_tv(agent_position, tvs_positions)
-    agents_grouped_by_tv[closest_tv_index].append(i)
-
-# Print the grouped agents based on closest TV
-print("Agents grouped by closest TV:")
-for tv_index, agent_indices in agents_grouped_by_tv.items():
-    print(f"TV {tv_index + 1}: Agents {agent_indices}")
 
 # Database model for Agent
 class Agent(Base):
@@ -150,6 +133,7 @@ def run_ssic_model(agent_array):
             Ri[i, t] = beta_Ri * (omega_Ri * Si[i, t] + (1 - omega_Ri) * Li[i, t]) * agent_array[i, 8] * (1 - Psi[i, t])
 
     return Pa, Si, Ri, Dh, Ds, Df, Li, Psi  # or other desired outputs
+
 
 # Dependency to get the database session
 def get_db():

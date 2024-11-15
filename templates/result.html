@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Results</title>
+    <style>
+        img {
+            display: block;
+            margin: 10px auto;
+            max-width: 90%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Simulation Results</h1>
+    <p>Below are the generated graphs from the simulation:</p>
+    <div>
+        {% for image_url in image_urls %}
+        <img src="{{ image_url }}" alt="Simulation Graph">
+        {% endfor %}
+    </div>
+</body>
+
+</html>

@@ -51,6 +51,9 @@
                         <div class="card-body text-center">
                             <img src="data:image/png;base64,{{ plot_data }}" alt="Grid Plot" class="img-fluid rounded">
                         </div>
+                        <form method="POST" action="/simulate"><button type="submit"
+                                class="btn btn-success btn-block">Simulate</button></form>
+
                     </div>
                 </div>
 
@@ -118,9 +121,13 @@
                         <div class="card-header">Agent List</div>
                         <div class="card-body">
                             <ul class="list-group">
-                                {% for agent in agents %}
-                                <li class="list-group-item">{{ agent.name }}</li>
+                                {% if curr_agents %}
+                                {% for agent in curr_agents %}
+                                <li class="list-group-item">{{ agent[0] }} (X: {{ agent[1] }}, Y: {{ agent[2] }})</li>
                                 {% endfor %}
+                                {% else %}
+                                <li class="list-group-item text-muted">No agents added yet.</li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div>

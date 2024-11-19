@@ -1,3 +1,4 @@
+from collections import defaultdict
 from fastapi import FastAPI, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import create_engine, Column, Integer, String, Float
@@ -77,6 +78,40 @@ class Agent(Base):
 # Create tables
 Base.metadata.create_all(bind=engine)
 
+def euclid_dist(agentLoc, tvLoc):
+    return np.sqrt((agentLoc[0] - tvLoc[0]) ** 2 + (agentLoc[1] - tvLoc[1]) ** 2)
+
+def clustering(agent_array,agent_detail, tv_array):
+    
+    cluster = defaultdict(list)
+    
+    print(agent_array)
+    print(agent_detail)
+    
+    for index, agent in enumerate(agent_array):
+        print(index)
+        print(agent)
+        closest_tv_index = None
+        min_dist = float('inf')
+        
+        for tvindex, tv in enumerate(tv_array):
+            dist = euclid_dist((agent[1], agent[2]), (tv[1], tv[2]))
+            if dist < min_dist:
+                min_dist= dist
+                closest_tv_index = tvindex
+        
+        #Cluster is a 2d array where it saves it by groups of agents. [[A1, A2, A3],[A4,A5]]
+        cluster[closest_tv_index].append(agent)
+        print(index)
+        print(agent_detail[index])
+        cluster[closest_tv_index].append(agent_detail[index])
+    print("Cluster DEbug -------")
+    print(cluster)
+    print("Cluster DEbug -------")
+        
+    return cluster 
+
+#region SSIC Model
 def run_ssic_model(agent_array):
     # Time and model parameters
     maxLimY = 1.2
@@ -112,28 +147,29 @@ def run_ssic_model(agent_array):
     lambda_Df = 0.03
     gamma_Li = 0.5
     
-    # Initial state at t=1
+    #-------------------------------------------------------------
+    # Run the model at t=1
     for i in range(numAgents):
         Pa[i, 0] = Dh[i, 0] - (beta_Pa * Ds[i, 0])
         Si[i, 0] = beta_Si * Pa[i, 0] + (1 - beta_Si) * (omega_Ps * agent_array[i, 3] + (1 - omega_Ps) * agent_array[i, 4]) * agent_array[i, 7] * (1 - agent_array[i, 6])
         Psi[i, 0] = 1 / (1 + np.exp(-k * (Df[i, 0] * agent_array[i, 5])))
         Ri[i, 0] = beta_Ri * (omega_Ri * Si[i, 0] + (1 - omega_Ri) * Li[i, 0]) * agent_array[i, 8] * (1 - Psi[i, 0])
 
-    # Simulation for t=2 to numStep
+    # Run the model at t=2
     for t in range(1, numStep):
         for i in range(numAgents):
+            Pa[i, t] = Dh[i, t-1] - (beta_Pa * Ds[i, t])
+            Si[i, t] = beta_Si * Pa[i, t] + (1 - beta_Si) * (omega_Ps * agent_array[i, 3] + (1 - omega_Ps) * agent_array[i, 4]) * agent_array[i, 7] * (1 - agent_array[i, 6])
+            Psi[i, t] = Df[i, t-1] * agent_array[i, 5] / (1 + np.exp(-k * (Df[i, t-1] * agent_array[i, 5])))
+            Ri[i, t] = beta_Ri * (omega_Ri * Si[i, t] + (1 - omega_Ri) * Li[i, t-1]) * agent_array[i, 8] * (1 - Psi[i, t])
+            
             Dh[i, t] = Dh[i, t-1] + gamma_Dh * (agent_array[i, 0] - lambda_Dh) * Dh[i, t-1] * (1 - Dh[i, t-1]) * dt
             Ds[i, t] = Ds[i, t-1] + gamma_Ds * (agent_array[i, 1] - lambda_Ds) * Ds[i, t-1] * (1 - Ds[i, t-1]) * dt
             Df[i, t] = Df[i, t-1] + gamma_Df * (agent_array[i, 2] - lambda_Df) * Df[i, t-1] * (1 - Df[i, t-1]) * dt
-
-            Pa[i, t] = Dh[i, t] - (beta_Pa * Ds[i, t])
-            Si[i, t] = beta_Si * Pa[i, t] + (1 - beta_Si) * (omega_Ps * agent_array[i, 3] + (1 - omega_Ps) * agent_array[i, 4]) * agent_array[i, 7] * (1 - agent_array[i, 6])
             Li[i, t] = Li[i, t-1] + gamma_Li * (Si[i, t-1] - Li[i, t-1]) * (1 - Li[i, t-1]) * Li[i, t-1] * dt
-            Psi[i, t] = Df[i, t] * agent_array[i, 5] / (1 + np.exp(-k * (Df[i, t] * agent_array[i, 5])))
-            Ri[i, t] = beta_Ri * (omega_Ri * Si[i, t] + (1 - omega_Ri) * Li[i, t]) * agent_array[i, 8] * (1 - Psi[i, t])
 
     return Pa, Si, Ri, Dh, Ds, Df, Li, Psi  # or other desired outputs
-
+#endregion
 
 # Dependency to get the database session
 def get_db():
@@ -287,35 +323,66 @@ async def read_index(request: Request, db: Session = Depends(get_db)):
     
 @app.post("/simulate", response_class=HTMLResponse)
 async def simulate(request: Request, db: Session = Depends(get_db)):
-    simulation_agents = []
+    simulation_agents_detail = []
+    simulation_agents_name = []
 
     # Retrieve agent data (same as before)
-    for agent_name, _, _ in agents_list:
+    for agent_name, agent_posX, agent_posY in agents_list:
         agent = db.query(Agent).filter(Agent.name == agent_name).first()
         if agent:
-            simulation_agents.append([
+            simulation_agents_detail.append([
                 agent.Ha, agent.Sd, agent.Fe, agent.Ex, agent.Op,
-                agent.Nu, agent.Eh, 0.5, 0.5  # Add defaults if needed
+                agent.Nu, agent.Eh, 0.5, 0.5
             ])
+            
+            simulation_agents_name.append([agent_name,
+                agent_posX, agent_posY])
+            
+    print("--------------AGENT ARRAY---------------")
+    for agent in agents_list:
+        print(agent)
+    
+    for agent in simulation_agents_detail:
+        print(agent)
+        
+    for agent in simulation_agents_name:
+        print(agent)
+    print("----------------------------------------")
+    
+    #Add the cluster loop here
+    try:
+        print("Clustering Start")
+        clusterAgent = clustering(agent_array = simulation_agents_name, agent_detail = simulation_agents_detail, tv_array=tv_positions)
+        print("Clustering End")        
+        for tv, cluster in clusterAgent.items():
+            print("Printing Cluster")
+            print(tv+1)
+            for agent in cluster:
+                print(agent[0], agent[1], agent[2])
+    except Exception as e:
+        print(e)
 
     # Convert to numpy array
-    agent_array = np.array(simulation_agents)
+    agent_array = np.array(simulation_agents_detail)
 
     # Run the SSIC model
     Pa, Si, Ri, Dh, Ds, Df, Li, Psi = run_ssic_model(agent_array)
 
     # Save graphs to static directory
     image_urls = []
+    
     def save_fig_to_file(fig, name):
         path = STATIC_DIR / f"{name}.png"
         fig.savefig(path)
         image_urls.append(f"/static/{name}.png")
-
-    # Generate 3D surface plots
+    
+    #region Generate 3D surface plots
+    
+    #Temporal Graphs
     fig = plt.figure(figsize=(12, 8))
     fig.suptitle('Temporal Factors (3D Surface Plots)')
     time = np.arange(1000)
-    agents = np.arange(len(simulation_agents))
+    agents = np.arange(len(simulation_agents_detail))
     T, A = np.meshgrid(time, agents)
 
     ax1 = fig.add_subplot(2, 2, 1, projection='3d')
@@ -349,24 +416,105 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
     plt.tight_layout()
     save_fig_to_file(fig, "3d_temporal_factors")
     plt.close(fig)
+    
+    #Instantaneous Graphs
+    
+    fig = plt.figure(figsize=(12, 8))
+    fig.suptitle('Instantaneous Factors (3D Surface Plots)')
+    time = np.arange(1000)
+    agents = np.arange(len(simulation_agents_detail))
+    T, A = np.meshgrid(time, agents)
 
-    # Generate 2D line plots
+    # Plot Positive Affect
+    ax1 = fig.add_subplot(2, 2, 1, projection='3d')
+    ax1.plot_surface(T, A, Pa, cmap='viridis')
+    ax1.set_title('Positive Affect')
+    ax1.set_xlabel('Time steps')
+    ax1.set_ylabel('Agents')
+    ax1.set_zlabel('Levels')
+
+    # Plot Short-Term Willingness to Interact
+    ax2 = fig.add_subplot(2, 2, 2, projection='3d')
+    ax2.plot_surface(T, A, Si, cmap='plasma')
+    ax2.set_title('Short-Term Willingness to Interact')
+    ax2.set_xlabel('Time steps')
+    ax2.set_ylabel('Agents')
+    ax2.set_zlabel('Levels')
+
+    # Plot Experienced Fear
+    ax3 = fig.add_subplot(2, 2, 3, projection='3d')
+    ax3.plot_surface(T, A, Psi, cmap='cividis')
+    ax3.set_title('Experienced Fear')
+    ax3.set_xlabel('Time steps')
+    ax3.set_ylabel('Agents')
+    ax3.set_zlabel('Levels')
+
+    # Plot Readiness to Interact
+    ax4 = fig.add_subplot(2, 2, 4, projection='3d')
+    ax4.plot_surface(T, A, Ri, cmap='magma')
+    ax4.set_title('Readiness to Interact')
+    ax4.set_xlabel('Time steps')
+    ax4.set_ylabel('Agents')
+    ax4.set_zlabel('Levels')
+
+    plt.tight_layout()
+    save_fig_to_file(fig, "3d_instantaneous_factors")
+    plt.close(fig)
+    
+    #endregion
+
+
+    #region Generate 2D line plots
+    
+    #Temporal Graphs
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
     fig.suptitle('Temporal Factors (2D Line Plots)')
-    for i in range(len(simulation_agents)):
-        axes[0, 0].plot(time, Dh[i, :], label=f'Agent {i+1}')
-        axes[0, 1].plot(time, Ds[i, :], label=f'Agent {i+1}')
-        axes[1, 0].plot(time, Df[i, :], label=f'Agent {i+1}')
-        axes[1, 1].plot(time, Li[i, :], label=f'Agent {i+1}')
+    for i in range(len(simulation_agents_detail)):
+        axes[0, 0].plot(time, Dh[i, :], label=f'{simulation_agents_name[i]}')
+        axes[0, 1].plot(time, Ds[i, :], label=f'{simulation_agents_name[i]}')
+        axes[1, 0].plot(time, Df[i, :], label=f'{simulation_agents_name[i]}')
+        axes[1, 1].plot(time, Li[i, :], label=f'{simulation_agents_name[i]}')
     axes[0, 0].set_title('Dynamic Happiness')
     axes[0, 1].set_title('Dynamic Sadness')
     axes[1, 0].set_title('Dynamic Fear')
     axes[1, 1].set_title('Long-Term Willingness to Interact')
+    
+    # Add legends to each subplot
+    axes[0, 0].legend(loc='best', fontsize=10)
+    axes[0, 1].legend(loc='best', fontsize=10)
+    axes[1, 0].legend(loc='best', fontsize=10)
+    axes[1, 1].legend(loc='best', fontsize=10)
 
     plt.tight_layout()
     save_fig_to_file(fig, "2d_temporal_factors")
     plt.close(fig)
+    
+    #Instantaneous Graphs
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    fig.suptitle('Temporal Factors (2D Line Plots)')
+    for i in range(len(simulation_agents_detail)):
+        axes[0, 0].plot(time, Pa[i, :], label=f'{simulation_agents_name[i]}')
+        axes[0, 1].plot(time, Si[i, :], label=f'{simulation_agents_name[i]}')
+        axes[1, 0].plot(time, Psi[i, :], label=f'{simulation_agents_name[i]}')
+        axes[1, 1].plot(time, Ri[i, :], label=f'{simulation_agents_name[i]}')
+    axes[0, 0].set_title('Positive Affect')
+    axes[0, 1].set_title('Short Term Willingness to Interact')
+    axes[1, 0].set_title('Experienced Fear')
+    axes[1, 1].set_title('Readiness to Interact')
+    
+    # Add legends to each subplot
+    axes[0, 0].legend(loc='best', fontsize=10)
+    axes[0, 1].legend(loc='best', fontsize=10)
+    axes[1, 0].legend(loc='best', fontsize=10)
+    axes[1, 1].legend(loc='best', fontsize=10)
 
+    plt.tight_layout()
+    save_fig_to_file(fig, "2d_instantaneous_factors")
+    plt.close(fig)
+
+    #endregion
+    
+    
     # Render the result.html template with the image URLs
     return templates.TemplateResponse("result.html", {"request": request, "image_urls": image_urls})
 

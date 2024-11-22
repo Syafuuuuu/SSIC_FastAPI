@@ -4,8 +4,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulation Results</title>
+    <title>Agent Simulation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        .card {
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .form-check-label {
+            font-size: 1em;
+        }
+
+        .form-range {
+            background-color: #e9ecef;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 5px;
+            font-size: 1.1em;
+            padding: 10px 20px;
+        }
+
+        h2 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #343a40;
+        }
+
         img {
             display: block;
             margin: 10px auto;
@@ -14,16 +53,52 @@
     </style>
 </head>
 
-<body>
-    <h1>Simulation Results</h1>
-    <p>Below are the generated graphs from the simulation:</p>
-    <div>
-        {% for images in image_urls %}
-        <img src="{{ images[0] }}" alt="Simulation Graph">
-        <img src="{{ images[2] }}" alt="Simulation Graph">
-        <img src="{{ images[1] }}" alt="Simulation Graph">
-        <img src="{{ images[3] }}" alt="Simulation Graph">
+<body class="bg-dark">
+    <div class="container mt-5">
+        <h1>Simulation Results</h1>
+        <p>Below are the generated graphs from the simulation:</p>
+
+
+        <!-- Goes into Each Cluster where i is the cluster index-->
+        {% for i in range(image_urls|length) %}
+        <div class="card">
+            <div class="card-header">
+                <h1>Cluster {{ i+1 }}</h1>
+            </div>
+            <div class="card-body">
+                <table>
+                    <tr>
+                        <td><img src="{{ image_urls[i][0] }}" alt="Simulation Graph"></td>
+                        <td><img src="{{ image_urls[i][1] }}" alt="Simulation Graph"></td>
+                    </tr>
+                    <tr>
+                        <td><img src="{{ image_urls[i][2] }}" alt="Simulation Graph"></td>
+                        <td><img src="{{ image_urls[i][3] }}" alt="Simulation Graph"></td>
+                    </tr>
+                </table>
+
+                <table>
+                    <tr>
+                        {% for j in range(interests[i]|length) %}
+                        <th>Agent {{ j+1 }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for j in range(interests[i]|length) %}
+                        <th>{{ interests[i][j] }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for j in range(culture[i]|length) %}
+                        <th>{{ culture[i][j] }}</th>
+                        {% endfor %}
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <br><br><br>
         {% endfor %}
+
     </div>
 </body>
 

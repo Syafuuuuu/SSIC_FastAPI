@@ -54,7 +54,6 @@ class Agent(Base):
     Hobb4 = Column(Integer, default=0)
     Hobb5 = Column(Integer, default=0)
     Hobb6 = Column(Integer, default=0)
-    Hobb7 = Column(Integer, default=0)
     Int1 = Column(Integer, default=0)
     Int2 = Column(Integer, default=0)
     Int3 = Column(Integer, default=0)
@@ -78,11 +77,14 @@ class Agent(Base):
 # Create tables
 Base.metadata.create_all(bind=engine)
 
+#region Clustering Algorithm
+
+#------------------------------------- Euclidian Distance Calculator
 def euclid_dist(agentLoc, tvLoc):
     return np.sqrt((agentLoc[0] - tvLoc[0]) ** 2 + (agentLoc[1] - tvLoc[1]) ** 2)
 
-#region Clustering Algorithm
-def clustering(agent_array,agent_detail, tv_array):
+#------------------------------------- Clustering Algorithm
+def clustering(agent_array,agent_detail, agent_interest, agent_culture, tv_array):
     
     cluster = defaultdict(list)
     agent_packet = []
@@ -103,7 +105,7 @@ def clustering(agent_array,agent_detail, tv_array):
                 closest_tv_index = tvindex
                 
         #Packet up the agent and its info
-        agent_packet = [agent,agent_detail[index]]
+        agent_packet = [agent,agent_detail[index], agent_interest[index], agent_culture[index]]
         
         #Cluster is a 2d array where it saves it by groups of agents. [[A1, A2, A3],[A4,A5]]
         cluster[closest_tv_index].append(agent_packet)
@@ -120,6 +122,53 @@ def clustering(agent_array,agent_detail, tv_array):
         
     return cluster 
 #endregion
+
+
+#region Similarities
+
+#-------------------------------------------------- Jaccard Similarity
+def jaccard(set1, set2):
+    intersection = sum([1 for a, b in zip(set1, set2) if a == b == True])
+    union = sum([1 for a, b in zip(set1, set2) if a == True or b == True])
+    return intersection / union if union != 0 else 0
+
+#-------------------------------------------------- Jaccard Similarity
+def agent_similarity(Packets):      #Plan to pass both interest and cultural packets
+    
+    table = []
+    similarities = np.zeros((len(Packets), len(Packets)))
+    average_similarities = []
+    
+    
+    for i in range(len(Packets)):          #Excesses each agent detail in packet
+        for j in range(i, len(Packets)):
+            similarity = jaccard(Packets[i], Packets[j]) 
+            similarities[i][j] = similarity
+            similarities[j][i] = similarity
+    
+    average_similarities = []
+    for i in range(len(Packets)):
+        avg_similarity = (np.sum(similarities[i]) - similarities[i][i]) / (len(Packets) - 1)
+        average_similarities.append(avg_similarity)        
+        
+    # Printing the similarities in a tabular format
+    print("Agent Pair | Jaccard Similarity")
+    print("-----------|-------------------")
+    for i in range(len(Packets)):
+        for j in range(len(Packets)):
+            if i != j: 
+                print(f" {i}{j} | {similarities[i][j]:.4f}") 
+    
+    # Printing the average similarities 
+    print("\nAverage Similarities per Agent:")
+    for i in range(len(Packets)):
+        print(f"Agent {i}: {average_similarities[i]:.4f}")
+        
+    return average_similarities
+
+
+#endregion
+
 
 #region SSIC Model
 def run_ssic_model(agent_array):
@@ -340,18 +389,50 @@ async def read_index(request: Request, db: Session = Depends(get_db)):
 async def simulate(request: Request, db: Session = Depends(get_db)):
     simulation_agents_detail = []
     simulation_agents_name = []
+    simulation_agents_interest = []
+    simulation_agents_culture = []
 
     # Retrieve agent data (same as before)
     for agent_name, agent_posX, agent_posY in agents_list:
+        
+        Ni = 0.5
+        Nc = 0.5
+        
+        if agent_name == "Low Case":
+            Ni = 0.1
+            Nc = 0.1
+        elif agent_name == "High Case":
+            Ni = 0.9
+            Nc = 0.9
+        else:
+            Ni = 0.5
+            Nc = 0.5
+        
         agent = db.query(Agent).filter(Agent.name == agent_name).first()
         if agent:
+            
+            #Get Agent SSIC Model Details
             simulation_agents_detail.append([
                 agent.Ha, agent.Sd, agent.Fe, agent.Ex, agent.Op,
-                agent.Nu, agent.Eh, 0.5, 0.5
+                agent.Nu, agent.Eh, Nc, Ni
             ])
             
+            #Get Agent Locations for Cluster
             simulation_agents_name.append([agent_name,
                 agent_posX, agent_posY])
+            
+            #Get Agent Interest Similarity Details
+            simulation_agents_interest.append([
+                agent.Hobb1, agent.Hobb2, agent.Hobb3, agent.Hobb4, agent.Hobb5, agent.Hobb6, 
+                agent.Int1, agent.Int2, agent.Int3, agent.Int4, agent.Int5, agent.Int6   
+            ])
+            
+            #Get Agent Cultural Similarity Details
+            simulation_agents_culture.append([
+                agent.Lang1, agent.Lang2, agent.Lang3, agent.Lang4,
+                agent.Race1, agent.Race2, agent.Race3, agent.Race4,
+                agent.Rel1, agent.Rel2, agent.Rel3, agent.Rel4  
+            ])
             
     print("--------------AGENT ARRAY---------------")
     for agent in agents_list:
@@ -362,52 +443,75 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
         
     for agent in simulation_agents_name:
         print(agent)
+        
+    for agent in simulation_agents_interest:
+        print(agent)
+        
+    for agent in simulation_agents_culture:
+        print(agent)
     print("----------------------------------------")
     
     #Add the cluster loop here
-    try:
-        print("Clustering Start")
-        clusterAgent = clustering(agent_array = simulation_agents_name, agent_detail = simulation_agents_detail, tv_array=tv_positions)
-        print("Clustering End")        
-        for tv, cluster in clusterAgent.items(): #[key1: [AgentPacket, AgentPacket], key2: [AgentPacket, AgentPacket]]
-            print("Printing Cluster")
-            print(tv+1)
-            for agentPacket in cluster: # AgentPacket = [AgentName&Loc, AgentDetails]
-                for agentDetail in agentPacket:
-                    print(agentDetail)
-                    
-    except Exception as e:
-        print(e)
+    
+    print("Clustering Start")
+    clusterAgent = clustering(agent_array = simulation_agents_name, agent_detail = simulation_agents_detail, agent_interest = simulation_agents_interest, agent_culture = simulation_agents_culture, tv_array=tv_positions)
+    print("Clustering End")        
+    for tv, cluster in clusterAgent.items(): #[key1: [AgentPacket, AgentPacket], key2: [AgentPacket, AgentPacket]]
+        print("Printing Cluster")
+        print(tv+1)
+        for agentPacket in cluster: # AgentPacket = [AgentName&Loc, AgentDetails]
+            for agentDetail in agentPacket:
+                print(agentDetail)
 
         
         
     #region Running the SSIC Model based on Clusters    
     # Save graphs to static directory
-    image_urls = []    
+    image_urls = []             # [ Image_URL_Cluster_1, Image_URL_Cluster_2 ... ] // Image_URL_Cluster_1 = [Image1, Image2, Image3, ..]
     
+    #Average Values per Agent
+    cluster_interest = []       # [ Interest_Cluster_1, Interest_Cluster_2, ... ] // Interest_Cluster_1 = []
+    cluster_culture = []        # [ Culture_Cluster_1, Culture_Cluster_2, ... ] // Culture_Cluster_1 = []
+       
+    
+     
+    #Runs Each Cluter Differently
     for tv, cluster in clusterAgent.items():
         clusterName = tv+1
         agent_array=[]
         agent_name=[]
+        agent_interest=[]
+        agent_culture=[]
         
         print(clusterName)
         print(cluster)
         
         
+        #Unpacks the Agent Packets into their arrays to be used for different methods
         print("----------------AGENTPACKET-----------------")
         for agentPacket in cluster:
-            agent_name.append(agentPacket[0])           #agentPacket[0] = agent name, x, y
-            agent_array.append(agentPacket[1])          #agentPacket[1] = SSIC Model input
+            agent_name.append(agentPacket[0])              #agentPacket[0] = agent name, x, y
+            agent_array.append(agentPacket[1])             #agentPacket[1] = SSIC Model input
+            agent_interest.append(agentPacket[2])          #agentPacket[2] = Interest Similarity input
+            agent_culture.append(agentPacket[3])           #agentPacket[3] = Cultural Similarity input
                 
         print(agent_name)
         print(agent_array)    
-        #-------------------------------------------------------------------
-        # Convert to numpy array
         print("----------------AGENTPACKET END-----------------")
-
-        agent_array = np.array(agent_array)
         
+        #-------------------------- Interest Similarities -----------------------------------------
+        
+        print("----------------Interest Similarities-----------------")
+        cluster_interest.append(agent_similarity(agent_interest))
+        
+        #-------------------------- Cultural Similarities -----------------------------------------
+        
+        print("----------------Cultural Similarities-----------------")
+        cluster_culture.append(agent_similarity(agent_culture))
+        
+        #-------------------------- SSIC MODEL -----------------------------------------
         # Run the SSIC model
+        agent_array = np.array(agent_array)
         Pa, Si, Ri, Dh, Ds, Df, Li, Psi = run_ssic_model(agent_array)
 
         # Save graphs to static directory
@@ -568,7 +672,7 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
     #endregion
     
     # Render the result.html template with the image URLs
-    return templates.TemplateResponse("result.html", {"request": request, "image_urls": image_urls})
+    return templates.TemplateResponse("result.html", {"request": request, "image_urls": image_urls, "interests": cluster_interest, "culture": cluster_culture})
 
 #endregion
 

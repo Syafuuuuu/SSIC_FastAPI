@@ -35,6 +35,9 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 tv_positions = []
 agents_list = []
 
+GNumStep = 100000
+
+
 
 # Database model for Agent
 class Agent(Base):
@@ -175,8 +178,8 @@ def run_ssic_model(agent_array):
     # Time and model parameters
     maxLimY = 1.2
     minLimX = 0
-    numStep = 1000
-    numStepChange = 1000
+    numStep = GNumStep
+    numStepChange = GNumStep
     dt = 0.1
     k = 12
     
@@ -414,7 +417,7 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
             #Get Agent SSIC Model Details
             simulation_agents_detail.append([
                 agent.Ha, agent.Sd, agent.Fe, agent.Ex, agent.Op,
-                agent.Nu, agent.Eh, Nc, Ni
+                agent.Nu, agent.Eh, Nc, Ni,
             ])
             
             #Get Agent Locations for Cluster
@@ -475,7 +478,7 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
        
     
      
-    #Runs Each Cluter Differently
+    #Runs Each Cluster Differently
     for tv, cluster in clusterAgent.items():
         clusterName = tv+1
         agent_array=[]
@@ -503,13 +506,25 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
         
         print("----------------Interest Similarities-----------------")
         cluster_interest.append(agent_similarity(agent_interest))
+        print(cluster_interest)
         
         #-------------------------- Cultural Similarities -----------------------------------------
         
         print("----------------Cultural Similarities-----------------")
         cluster_culture.append(agent_similarity(agent_culture))
+        print(cluster_culture)
         
         #-------------------------- SSIC MODEL -----------------------------------------
+        
+        #adjust the agent_array by tweaking the Ni and Nc Values
+        for index, agent in enumerate(agent_array):
+            agent[7] = cluster_culture[0][index]
+            agent[8] = cluster_interest[0][index]
+            
+        #------------------------- Print out final Agent Array ------------------------
+        print("#------------------------- Print out final Agent Array ------------------------#")
+        print(agent_array)
+        
         # Run the SSIC model
         agent_array = np.array(agent_array)
         Pa, Si, Ri, Dh, Ds, Df, Li, Psi = run_ssic_model(agent_array)
@@ -532,7 +547,7 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
         #Temporal Graphs
         fig = plt.figure(figsize=(12, 8))
         fig.suptitle('Temporal Factors (3D Surface Plots)')
-        time = np.arange(1000)
+        time = np.arange(GNumStep)
         agents = np.arange(len(agent_name))
         T, A = np.meshgrid(time, agents)
 
@@ -572,7 +587,7 @@ async def simulate(request: Request, db: Session = Depends(get_db)):
         
         fig = plt.figure(figsize=(12, 8))
         fig.suptitle('Instantaneous Factors (3D Surface Plots)')
-        time = np.arange(1000)
+        time = np.arange(GNumStep)
         agents = np.arange(len(agent_name))
         T, A = np.meshgrid(time, agents)
 

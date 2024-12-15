@@ -37,7 +37,16 @@ agents_list = []
 
 GNumStep = 100000
 
-
+def translate(input):
+    match input:
+        case 1:
+            return [1,0,0,0]
+        case 2:
+            return [0,1,0,0]
+        case 3:
+            return [0,0,1,0]
+        case 4:
+            return [0,0,0,1]
 
 # Database model for Agent
 class Agent(Base):
@@ -247,6 +256,11 @@ def get_db():
 async def read_form(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
+# HTML form rendering for users
+@app.get("/register", response_class=HTMLResponse)
+async def read_form(request: Request):
+    return templates.TemplateResponse("userregister.html", {"request": request})
+
 # Add TV to session
 # Endpoint to handle the TV addition form
 @app.post("/add_tv")
@@ -274,21 +288,48 @@ async def add_agent(name: str = Form(...), posX: int = Form(...), posY: int = Fo
 @app.post("/submit/")
 async def submit_form(
     name: str = Form(...),
-    Ex: float = Form(...),
-    Op: float = Form(...),
-    Nu: float = Form(...),
+    #Personality
+    Ex1R: int = Form(...),
+    Ex6: int = Form(...),
+    Op5R: int = Form(...),
+    Op10: int = Form(...),
+    Nu4R: int = Form(...),
+    Nu9: int = Form(...),
+    
+    #Emotion
     Ha: float = Form(...),
     Sd: float = Form(...),
     Fe: float = Form(...),
     Eh: float = Form(...),
+    
+    #Hobb & Interest
     HobbArr: List[str] = Form([]),
     IntArr: List[str] = Form([]),
+    
+    #
     Language: List[str] = Form([]),
-    Race: List[str] = Form([]),
-    Religion: List[str] = Form([]),
+    Race: int = Form([]),
+    Religion: int = Form([]),
     db: Session = Depends(get_db)
     
     ):
+    
+    # Calculate float values 
+    ex1r_float = (6 - Ex1R) / 5 
+    ex6_float = (Ex6 - 1) / 4 
+    op5r_float = (6 - Op5R) / 5 
+    op10_float = (Op10 - 1) / 4 
+    nu4r_float = (6 - Nu4R) / 5 
+    nu9_float = (Nu9 - 1) / 4 
+    
+    # Assign to Ex, Op, and Nu variables
+    Ex = (ex1r_float + ex6_float) / 2 
+    Op = (op5r_float + op10_float) / 2 
+    Nu = (nu4r_float + nu9_float) / 2
+        
+    # Translate Religion and Culture
+    race_values = translate(Race)
+    rel_values = translate(Religion)
     
     # Debugging print statements
     print(f"Name: {name}")
@@ -304,8 +345,8 @@ async def submit_form(
     hobb_values = [int(str(i) in HobbArr) for i in range(1, 7)]
     int_values = [int(str(i) in IntArr) for i in range(1, 7)]
     lang_values = [int(str(i) in Language) for i in range(1, 5)]
-    race_values = [int(str(i) in Race) for i in range(1, 5)]
-    rel_values = [int(str(i) in Religion) for i in range(1, 5)]
+    # race_values = [int(str(i) in Race) for i in range(1, 5)]
+    # rel_values = [int(str(i) in Religion) for i in range(1, 5)]
     
     print(f"Converted Hobbies: {hobb_values}")
     print(f"Converted Interests: {int_values}")

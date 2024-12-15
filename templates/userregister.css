@@ -1,0 +1,20 @@
+/* Progress Bar Styling */
+.progress-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Likert Scale Styling */
+.likert-scale label {
+    margin-right: 10px;
+}
+
+.likert-scale input[type="radio"] {
+    margin: 0 5px;
+    position: relative;
+    top: -2px;
+}

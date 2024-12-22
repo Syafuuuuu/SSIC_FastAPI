@@ -51,8 +51,12 @@
                         <div class="card-body text-center">
                             <img src="data:image/png;base64,{{ plot_data }}" alt="Grid Plot" class="img-fluid rounded">
                         </div>
-                        <form method="POST" action="/simulate"><button type="submit"
-                                class="btn btn-success btn-block">Simulate</button></form>
+                        <form method="POST" action="/simulate">
+                            <div class="input-group date">
+                                <input type="date" id="date" name="date" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">Simulate</button>
+                        </form>
 
                     </div>
                 </div>

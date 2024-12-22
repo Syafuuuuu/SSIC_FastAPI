@@ -35,8 +35,9 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 tv_positions = []
 agents_list = []
 
-GNumStep = 100000
+GNumStep = 5000
 
+#Translate iput for religion and culture (either or kinda thing)
 def translate(input):
     match input:
         case 1:
@@ -47,6 +48,26 @@ def translate(input):
             return [0,0,1,0]
         case 4:
             return [0,0,0,1]
+
+#Decision Model
+def decision_model(date):
+    
+    print("-------------------------------------------------------------------------------DATE-------------------------------------------------------------------------------")
+    print(date)
+    print("-------------------------------------------------------------------------------DATE-------------------------------------------------------------------------------")
+    gen_fest = {"01-01": "Happy New Year!", "08-31": "Merdeka!", "09-16": "Hari Malaysia", "02-14": "Valentine", "05-01": "Labour Day"}
+    muslim_fest = {"03": "Ramadhan", "04": "Raya Eidilfitri", "06": "Raya Adha"}
+    christ_fest = {"12": "Christmas", "04": "Easter"}
+    bhud_fest = {"05": "Vesak"}
+    hindu_fest = {"10": "Deepavali", "02": "Thaipusam", "01": "Ponggal"}
+    chinese_fest = {"10": "Mooncake Festival", "04": "Qing Ming", "01": "Chinese New Year", "12": "Winter Solstice"}
+    
+    if date in gen_fest:
+        print("General Festival code")
+    else:
+        print("Check what is the highest religion in the group")
+        
+        
 
 # Database model for Agent
 class Agent(Base):
@@ -430,11 +451,17 @@ async def read_index(request: Request, db: Session = Depends(get_db)):
 
 #region SIMULATION
 @app.post("/simulate", response_class=HTMLResponse)
-async def simulate(request: Request, db: Session = Depends(get_db)):
+async def simulate(request: Request, db: Session = Depends(get_db), date: str = Form(...)):
     simulation_agents_detail = []
     simulation_agents_name = []
     simulation_agents_interest = []
     simulation_agents_culture = []
+    
+    print("_____________________DATE DEBUG______________________________")
+    print(date)
+    decision_model(date=date[5:])
+    print("Decision model finished")
+    print("_____________________DATE DEBUG______________________________")
 
     # Retrieve agent data (same as before)
     for agent_name, agent_posX, agent_posY in agents_list:

@@ -37,7 +37,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 tv_positions = []
 agents_list = []
 
-GNumStep = 100000
+GNumStep = 10000
 
 #Translate iput for religion and culture (either or kinda thing)
 def translate(input):
@@ -98,7 +98,7 @@ def extrovert_index(agent_behaviour):
     return ready_to_interact_index, willing_to_interact_index
 
 
-def Gate1(date_str, festivals):
+def Gate4(date_str, festivals):
     input_date = datetime.strptime(date_str, "%Y-%m-%d")
     
     #Check whole general festival dates
@@ -132,7 +132,7 @@ def Gate2(date_str, festivals):
     return False, "", ""
   
     
-def Gate3(agent_behaviour, agent_int, agent_cult, int_count, int_avg, cult_count, cult_avg):
+def Gate1(agent_behaviour, agent_int, agent_cult, int_count, int_avg, cult_count, cult_avg):
     
     if(not has_extrovert(agent_behaviour=agent_behaviour, type="willing")):
         return False
@@ -146,7 +146,7 @@ def Gate3(agent_behaviour, agent_int, agent_cult, int_count, int_avg, cult_count
 
 
 #Decision Model
-def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_culture, culture_count, interest_avg, culture_avg):
+def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_culture, culture_count, interest_arr, culture_arr):
     
     contentURL = ""
     
@@ -281,51 +281,43 @@ def clustering(agent_array,agent_detail, agent_interest, agent_culture, tv_array
 
 #region Similarities
 
-#-------------------------------------------------- Jaccard Similarity
-def jaccard(set1, set2):
-    intersection = sum([1 for a, b in zip(set1, set2) if a == b == True])
-    union = sum([1 for a, b in zip(set1, set2) if a == True or b == True])
-    return intersection / union if union != 0 else 0
+#-------------------------------------------------- Similarity AND Algo
 
-#-------------------------------------------------- Jaccard Similarity
-def agent_similarity(Packets, type):      #Plan to pass both interest and cultural packets
+def agent_similarity(Packets):      #Plan to pass both interest and cultural packets
+    
+    def sim(set1, set2):
+        return 1 if any(a&b for a,b in zip(set1,set2)) else 0
+
+    def OR_algo(similarity_matrix):
+        # Perform a logical OR operation across each row
+        return [1 if any(row) else 0 for row in similarity_matrix]
+    
+    print("---- Old Sim Algo ----")
+    print("Input:")
+    print(Packets)
+    print("")
+    
     similarities = np.zeros((len(Packets), len(Packets)))
-    average_similarities = []
+    # print(f"Similarity intialisation: \n{similarities}")
     count_similar = []
     
     for i in range(len(Packets)):          #Excesses each agent detail in packet
         for j in range(i, len(Packets)):
-            similarity = jaccard(Packets[i], Packets[j]) 
+            similarity = sim(Packets[i], Packets[j]) 
             similarities[i][j] = similarity
             similarities[j][i] = similarity
-                
-    average_similarities = []
-    for i in range(len(Packets)):
-        avg_similarity = (np.sum(similarities[i]) - similarities[i][i]) / (len(Packets) - 1)
-        average_similarities.append(avg_similarity)
-        
+        # print(f"Similarity[i]: \n{similarities[i]}")
+    
     #Count function
     count_similar =  [0] * len(Packets[0])  
     for array in Packets:
         count_similar = [a + b for a, b in zip(count_similar, array)]
     
-    print(f"Basic Avg: {average_similarities}")
-    print(f"Counted Array: {count_similar}")
+    # print(f"Basic Avg: {average_similarities}")
+    # print(f"Counted Array: {count_similar}")
+
         
-    # # Printing the similarities in a tabular format
-    # print("Agent Pair | Jaccard Similarity")
-    # print("-----------|-------------------")
-    # for i in range(len(Packets)):
-    #     for j in range(len(Packets)):
-    #         if i != j: 
-    #             print(f" {i}{j} | {similarities[i][j]:.4f}") 
-    
-    # # Printing the average similarities 
-    # print("\nAverage Similarities per Agent:")
-    # for i in range(len(Packets)):
-    #     print(f"Agent {i}: {average_similarities[i]:.4f}")
-        
-    return average_similarities, count_similar
+    return OR_algo(similarities), count_similar
 
 
 #endregion
@@ -725,16 +717,16 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
         #-------------------------- Interest Similarities -----------------------------------------
         print("---- Similarity and Model Adjustment ----")
         # print("----------------Interest Similarities-----------------")
-        avg_sim, count_int = agent_similarity(agent_interest, "interest")
-        cluster_interest.append(avg_sim)
+        or_sim, count_int = agent_similarity(agent_interest)
+        cluster_interest.append(or_sim)
         cluster_interest_count.append(count_int)
         # print(cluster_interest)
         
         #-------------------------- Cultural Similarities -----------------------------------------
         
         # print("----------------Cultural Similarities-----------------")
-        avg_cult, count_cult = agent_similarity(agent_culture, "culture")
-        cluster_culture.append(avg_cult)
+        or_cult, count_cult = agent_similarity(agent_culture)
+        cluster_culture.append(or_cult)
         cluster_culture_count.append(count_cult)
         # print(cluster_culture)
         
@@ -800,9 +792,9 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
                        agent_interest=agent_interest,
                        agent_culture=agent_culture,
                        interest_count=count_int, 
-                       interest_avg=avg_sim,
+                       interest_arr=or_sim,
                        culture_count=count_cult,
-                       culture_avg=avg_cult)
+                       culture_arr=or_cult)
             )
         print("---- Decision model finished ----")
 

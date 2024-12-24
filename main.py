@@ -15,6 +15,8 @@ import numpy as np
 from pathlib import Path
 from fastapi.responses import StreamingResponse
 from io import BytesIO
+from datetime import datetime
+from collections import namedtuple
 
 # FastAPI app instance
 app = FastAPI()
@@ -35,11 +37,15 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 tv_positions = []
 agents_list = []
 
-GNumStep = 5000
+GNumStep = 100000
 
 #Translate iput for religion and culture (either or kinda thing)
 def translate(input):
     match input:
+        #   [0] - Malay/Islam
+        #   [1] - Chinese/Christian
+        #   [2] - Indian/Buddhism
+        #   [3] - Others/Hinduism
         case 1:
             return [1,0,0,0]
         case 2:
@@ -49,25 +55,141 @@ def translate(input):
         case 4:
             return [0,0,0,1]
 
+#Festivities
+Festival = namedtuple('Festival', ['name','start_date','end_date', 'video', 'culture'])
+
+def read_festivals_from_file(file_path): 
+    festivals = [] 
+    with open(file_path, 'r') as file: 
+        for line in file: 
+            parts = line.strip().split(',')
+            
+            if (len(parts) == 5):
+                name, start_date, end_date, video, culture = parts
+                festivals.append(Festival(name, start_date, end_date, video, culture))
+            else:
+                name, start_date, end_date, video = parts
+                festivals.append(Festival(name, start_date, end_date, video, None))                
+            
+    # print(festivals)
+    return festivals
+    
+def has_extrovert(agent_behaviour, type):
+    for agent in enumerate(agent_behaviour):
+        #   Li = agent[1]
+        if(type=="ready"):
+            pos = 0
+        if(type=="willing"):
+            pos = 1
+        if(agent[pos]>=0.5):
+            return True
+    return False
+
+def extrovert_index(agent_behaviour):
+    ready_to_interact_index = []
+    willing_to_interact_index = []
+    for index, agent in enumerate(agent_behaviour):
+        #   Ri = agent[0]
+        #   Li = agent[1]
+        if(agent[0]>=0.5):
+            ready_to_interact_index.append[index]
+        if(agent[1]>=0.5):
+            willing_to_interact_index.append[index]
+    return ready_to_interact_index, willing_to_interact_index
+
+
+def Gate1(date_str, festivals):
+    input_date = datetime.strptime(date_str, "%Y-%m-%d")
+    
+    #Check whole general festival dates
+    for festival in festivals:
+        start_date = datetime.strptime(festival.start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(festival.end_date, "%Y-%m-%d")
+        
+        #if it falls on a specific festival
+        if start_date <= input_date <= end_date: 
+            #return details of that festival
+            return True, festival.video
+    
+    return False, ""
+
+
+def Gate2(date_str, festivals):
+    input_date = datetime.strptime(date_str, "%Y-%m-%d")
+    
+    #Check whole cultural festival dates
+    for festival in festivals:
+        start_date = datetime.strptime(festival.start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(festival.end_date, "%Y-%m-%d")
+        
+        #If it falls on a cultural festival
+        if start_date <= input_date <= end_date: 
+            #Check if that cultural festival has any ready to interact members in this cluster
+            
+                #Does the 
+            return True, festival.video, festival.culture if festival.culture else ""
+    
+    return False, "", ""
+  
+    
+def Gate3(agent_behaviour, agent_int, agent_cult, int_count, int_avg, cult_count, cult_avg):
+    
+    if(not has_extrovert(agent_behaviour=agent_behaviour, type="willing")):
+        return False
+    
+    Ri_index, Li_index = extrovert_index(agent_behaviour=agent_behaviour)
+    # if 
+    
+    
+    
+    return False
+
+
 #Decision Model
-def decision_model(date):
+def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_culture, culture_count, interest_avg, culture_avg):
     
-    print("-------------------------------------------------------------------------------DATE-------------------------------------------------------------------------------")
-    print(date)
-    print("-------------------------------------------------------------------------------DATE-------------------------------------------------------------------------------")
-    gen_fest = {"01-01": "Happy New Year!", "08-31": "Merdeka!", "09-16": "Hari Malaysia", "02-14": "Valentine", "05-01": "Labour Day"}
-    muslim_fest = {"03": "Ramadhan", "04": "Raya Eidilfitri", "06": "Raya Adha"}
-    christ_fest = {"12": "Christmas", "04": "Easter"}
-    bhud_fest = {"05": "Vesak"}
-    hindu_fest = {"10": "Deepavali", "02": "Thaipusam", "01": "Ponggal"}
-    chinese_fest = {"10": "Mooncake Festival", "04": "Qing Ming", "01": "Chinese New Year", "12": "Winter Solstice"}
+    contentURL = ""
     
-    if date in gen_fest:
+    #Gate 1: General Festival
+    Gate1Flag, Gate1Video = Gate1(date, read_festivals_from_file("./static/gen_fest.txt"))
+    
+    #Gate 2: Cultural Festivals
+    Gate2Flag, Gate2Video, Gate2Culture = Gate2(date, read_festivals_from_file("./static/cult_fest.txt"))
+    
+    #Gate 3: Interest + Language + Trend
+    Gate3Flag = False
+    
+    #Gate 4: Interest + Trend
+    Gate4Flag = False
+    
+    #Gate 1: General Festival    
+    if(Gate1Flag):      #Checks for general festival dates
         print("General Festival code")
+        print(f"The video: {Gate1Video}")
+        contentURL = Gate1Video
+        
+    #Gate 2: Cultural Festivals
+    elif(Gate2Flag):    #Checks for cultural festivals with respect to culture (religion)                            
+        print("Cultural Festival code")
+        print(f"Video: {Gate2Video}")
+        print(f"Part of culture: {Gate2Culture}")
+        contentURL = Gate2Video
+    
+    #Gate 3: With respect to language - Interest vs Trend
+    elif(Gate3Flag): 
+        print("Interest/Trend in cluster Language")
+        
+    #Gate 4: Interest vs Trend
+    elif(Gate4Flag):
+        print("Interest in any langauge")
+        
+    #Gate 5: Trend in any language
     else:
-        print("Check what is the highest religion in the group")
-        
-        
+        print("Play trendiest interest rn")
+        Gate5Video = "https://www.youtube.com/watch?v=1-iBQDveqtU"
+        contentURL = Gate5Video
+     
+    return contentURL   
 
 # Database model for Agent
 class Agent(Base):
@@ -122,12 +244,12 @@ def clustering(agent_array,agent_detail, agent_interest, agent_culture, tv_array
     cluster = defaultdict(list)
     agent_packet = []
     
-    print(agent_array)
-    print(agent_detail)
+    # print(agent_array)
+    # print(agent_detail)
     
     for index, agent in enumerate(agent_array):
-        print(index)
-        print(agent)
+        # print(index)
+        # print(agent)
         closest_tv_index = None
         min_dist = float('inf')
         
@@ -149,9 +271,9 @@ def clustering(agent_array,agent_detail, agent_interest, agent_culture, tv_array
         # cluster[closest_tv_index].append(agent_detail[index])
     
     
-    print("Cluster DEbug -------")
-    print(cluster)
-    print("Cluster DEbug -------")
+    # print("Cluster DEbug -------")
+    # print(cluster)
+    # print("Cluster DEbug -------")
         
     return cluster 
 #endregion
@@ -166,38 +288,44 @@ def jaccard(set1, set2):
     return intersection / union if union != 0 else 0
 
 #-------------------------------------------------- Jaccard Similarity
-def agent_similarity(Packets):      #Plan to pass both interest and cultural packets
-    
-    table = []
+def agent_similarity(Packets, type):      #Plan to pass both interest and cultural packets
     similarities = np.zeros((len(Packets), len(Packets)))
     average_similarities = []
-    
+    count_similar = []
     
     for i in range(len(Packets)):          #Excesses each agent detail in packet
         for j in range(i, len(Packets)):
             similarity = jaccard(Packets[i], Packets[j]) 
             similarities[i][j] = similarity
             similarities[j][i] = similarity
-    
+                
     average_similarities = []
     for i in range(len(Packets)):
         avg_similarity = (np.sum(similarities[i]) - similarities[i][i]) / (len(Packets) - 1)
-        average_similarities.append(avg_similarity)        
+        average_similarities.append(avg_similarity)
         
-    # Printing the similarities in a tabular format
-    print("Agent Pair | Jaccard Similarity")
-    print("-----------|-------------------")
-    for i in range(len(Packets)):
-        for j in range(len(Packets)):
-            if i != j: 
-                print(f" {i}{j} | {similarities[i][j]:.4f}") 
+    #Count function
+    count_similar =  [0] * len(Packets[0])  
+    for array in Packets:
+        count_similar = [a + b for a, b in zip(count_similar, array)]
     
-    # Printing the average similarities 
-    print("\nAverage Similarities per Agent:")
-    for i in range(len(Packets)):
-        print(f"Agent {i}: {average_similarities[i]:.4f}")
+    print(f"Basic Avg: {average_similarities}")
+    print(f"Counted Array: {count_similar}")
         
-    return average_similarities
+    # # Printing the similarities in a tabular format
+    # print("Agent Pair | Jaccard Similarity")
+    # print("-----------|-------------------")
+    # for i in range(len(Packets)):
+    #     for j in range(len(Packets)):
+    #         if i != j: 
+    #             print(f" {i}{j} | {similarities[i][j]:.4f}") 
+    
+    # # Printing the average similarities 
+    # print("\nAverage Similarities per Agent:")
+    # for i in range(len(Packets)):
+    #     print(f"Agent {i}: {average_similarities[i]:.4f}")
+        
+    return average_similarities, count_similar
 
 
 #endregion
@@ -229,7 +357,7 @@ def run_ssic_model(agent_array):
     beta_Pa = 0.2
     omega_Ps = 0.5
     beta_Si = 0.5
-    omega_Ri = 0.0
+    omega_Ri = 0.5
     beta_Ri = 1.0
     gamma_Dh = 0.1
     lambda_Dh = 0.03
@@ -452,18 +580,24 @@ async def read_index(request: Request, db: Session = Depends(get_db)):
 #region SIMULATION
 @app.post("/simulate", response_class=HTMLResponse)
 async def simulate(request: Request, db: Session = Depends(get_db), date: str = Form(...)):
+    
+    print("")
+    print("")
+    print("")
+    print("")
+    print("--------------------------- SIMULATION START ---------------------------")
+    print("")
+    print("")
+    print("")
+    print("")
+
     simulation_agents_detail = []
     simulation_agents_name = []
     simulation_agents_interest = []
     simulation_agents_culture = []
-    
-    print("_____________________DATE DEBUG______________________________")
-    print(date)
-    decision_model(date=date[5:])
-    print("Decision model finished")
-    print("_____________________DATE DEBUG______________________________")
 
     # Retrieve agent data (same as before)
+    print("---- Retrieve Agent Data ----")
     for agent_name, agent_posX, agent_posY in agents_list:
         
         Ni = 0.5
@@ -504,36 +638,42 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
                 agent.Race1, agent.Race2, agent.Race3, agent.Race4,
                 agent.Rel1, agent.Rel2, agent.Rel3, agent.Rel4  
             ])
-            
-    print("--------------AGENT ARRAY---------------")
-    for agent in agents_list:
-        print(agent)
     
-    for agent in simulation_agents_detail:
-        print(agent)
+    print("---- Done Retrieve Data -----") 
+    print("")       
+    # print("--------------AGENT ARRAY---------------")
+    # for agent in agents_list:
+    #     print(agent)
+    
+    # for agent in simulation_agents_detail:
+    #     print(agent)
         
-    for agent in simulation_agents_name:
-        print(agent)
+    # for agent in simulation_agents_name:
+    #     print(agent)
         
-    for agent in simulation_agents_interest:
-        print(agent)
+    # for agent in simulation_agents_interest:
+    #     print(agent)
         
-    for agent in simulation_agents_culture:
-        print(agent)
-    print("----------------------------------------")
+    # for agent in simulation_agents_culture:
+    #     print(agent)
+    # print("----------------------------------------")
     
     #Add the cluster loop here
     
-    print("Clustering Start")
-    clusterAgent = clustering(agent_array = simulation_agents_name, agent_detail = simulation_agents_detail, agent_interest = simulation_agents_interest, agent_culture = simulation_agents_culture, tv_array=tv_positions)
-    print("Clustering End")        
+    print("---- Clustering Start ----")
+    
+    clusterAgent = clustering(agent_array = simulation_agents_name, agent_detail = simulation_agents_detail, agent_interest = simulation_agents_interest, agent_culture = simulation_agents_culture, tv_array=tv_positions)      
     for tv, cluster in clusterAgent.items(): #[key1: [AgentPacket, AgentPacket], key2: [AgentPacket, AgentPacket]]
-        print("Printing Cluster")
-        print(tv+1)
+        # print("Printing Cluster")
+        print("")
+        print(f"Cluster {tv+1} :")
         for agentPacket in cluster: # AgentPacket = [AgentName&Loc, AgentDetails]
             for agentDetail in agentPacket:
                 print(agentDetail)
-
+        print("")
+    
+    print("---- Clustering Complete ----")  
+    print("")   
         
         
     #region Running the SSIC Model based on Clusters    
@@ -542,60 +682,129 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
     
     #Average Values per Agent
     cluster_interest = []       # [ Interest_Cluster_1, Interest_Cluster_2, ... ] // Interest_Cluster_1 = []
+    cluster_interest_count = []
     cluster_culture = []        # [ Culture_Cluster_1, Culture_Cluster_2, ... ] // Culture_Cluster_1 = []
+    cluster_culture_count = []
+    cluster_behaviour = []
+    cluster_content = []        # [ Content_Cluster_1, Content_Cluster_2, ...] // Content_Cluster_1 = ["PAth_of_video.mp4"]
        
     
      
     #Runs Each Cluster Differently
+    print("---- Running Clusters ----")
+    print("")
     for tv, cluster in clusterAgent.items():
+        print(f"---- Cluster {tv+1} ----")
         clusterName = tv+1
+        
+        #Agent packet unpacker
         agent_array=[]
         agent_name=[]
         agent_interest=[]
         agent_culture=[]
         
-        print(clusterName)
-        print(cluster)
+        #SSIC Model results pack
+        agent_behaviour=[]
+        
+        # print(cluster)
         
         
         #Unpacks the Agent Packets into their arrays to be used for different methods
-        print("----------------AGENTPACKET-----------------")
+        print("---- Unpacking Agent Packet ----")
         for agentPacket in cluster:
             agent_name.append(agentPacket[0])              #agentPacket[0] = agent name, x, y
             agent_array.append(agentPacket[1])             #agentPacket[1] = SSIC Model input
             agent_interest.append(agentPacket[2])          #agentPacket[2] = Interest Similarity input
             agent_culture.append(agentPacket[3])           #agentPacket[3] = Cultural Similarity input
                 
-        print(agent_name)
-        print(agent_array)    
-        print("----------------AGENTPACKET END-----------------")
+        # print(agent_name)
+        # print(agent_array)    
+        print("---- Unpacking Compelete ----")
+        print("")   
         
         #-------------------------- Interest Similarities -----------------------------------------
-        
-        print("----------------Interest Similarities-----------------")
-        cluster_interest.append(agent_similarity(agent_interest))
-        print(cluster_interest)
+        print("---- Similarity and Model Adjustment ----")
+        # print("----------------Interest Similarities-----------------")
+        avg_sim, count_int = agent_similarity(agent_interest, "interest")
+        cluster_interest.append(avg_sim)
+        cluster_interest_count.append(count_int)
+        # print(cluster_interest)
         
         #-------------------------- Cultural Similarities -----------------------------------------
         
-        print("----------------Cultural Similarities-----------------")
-        cluster_culture.append(agent_similarity(agent_culture))
-        print(cluster_culture)
+        # print("----------------Cultural Similarities-----------------")
+        avg_cult, count_cult = agent_similarity(agent_culture, "culture")
+        cluster_culture.append(avg_cult)
+        cluster_culture_count.append(count_cult)
+        # print(cluster_culture)
         
         #-------------------------- SSIC MODEL -----------------------------------------
         
         #adjust the agent_array by tweaking the Ni and Nc Values
+        print("Attempt Asjustment on Ni and Nc")
+        print(f"Agent array SSIC Model: {agent_array}")
+        print(f"Clustuer culture: {cluster_culture}")
+        print(f"Cluster Interest: {cluster_interest}")
         for index, agent in enumerate(agent_array):
-            agent[7] = cluster_culture[0][index]
-            agent[8] = cluster_interest[0][index]
-            
+            agent[7] = cluster_culture[tv][index]
+            agent[8] = cluster_interest[tv][index]
+        print(" END Attempt Asjustment on Ni and Nc")        
         #------------------------- Print out final Agent Array ------------------------
         print("#------------------------- Print out final Agent Array ------------------------#")
         print(agent_array)
+        print("---- Similarity and Model Adjustment End ----")
+        print("")   
         
         # Run the SSIC model
+        print("--- Running the SSIC Model ----")
         agent_array = np.array(agent_array)
         Pa, Si, Ri, Dh, Ds, Df, Li, Psi = run_ssic_model(agent_array)
+        print("---- End SSIC Model Run ----")
+        print("")   
+        
+        # print("--------------------------------------------------------- Shape of Pa: ---------------------------------------------------------") 
+        # numpy_pa = np.array(Pa)
+        # print(numpy_pa.shape)
+        # print("--------------------------------------------------------- Shape of Pa: ---------------------------------------------------------") 
+        
+        #-------------------------- Final value of Behaviour -----------------------------------------
+        #Take out each behaviour Pa, Si, Ri... (which is in a [[],[],[],....] format into a [[-1],[-1], [-1], ...] to get all of the final values of each agent)
+        
+        #Then whack it together and then give it to cluster_behaviour
+        print("---- Extracting Final SSIC Model Data ----")
+        for index in range(len(Pa)):
+            agent_behaviour.append([
+                # Pa[index][-1],   #Pa  - Positive Affect
+                # Si[index][-1],   #Si  - Short-Term Willingness to Interact
+                Ri[index][-1],   #Ri  - Readiness to Interact
+                # Dh[index][-1],   #Dh  - Dynamic Happiness
+                # Ds[index][-1],   #Ds  - Dynamic Sadness
+                # Df[index][-1],   #Df  - Dynamic Fear
+                Li[index][-1],   #Li  - Long-Term Willingness to Interact
+                # Psi[index][-1],   #Psi - Experienced Fear
+            ])
+        cluster_behaviour.append(agent_behaviour)
+        print("---- Finish Extraction ----")
+        print("")   
+            
+        # print("_____________________ AGENT BEHAVIOUR _________________________________")    
+        # print(agent_behaviour) #Cluster Behaviour reached
+        
+        #Feed it to the if else gods
+        
+        print("____ Decision Model ____")
+        print(f"Date: {date}")
+        cluster_content.append(
+            decision_model(date=date, 
+                       agent_behaviour=agent_behaviour, 
+                       agent_interest=agent_interest,
+                       agent_culture=agent_culture,
+                       interest_count=count_int, 
+                       interest_avg=avg_sim,
+                       culture_count=count_cult,
+                       culture_avg=avg_cult)
+            )
+        print("---- Decision model finished ----")
 
         # Save graphs to static directory
         cluster_image_urls = []
@@ -746,16 +955,44 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
         save_fig_to_file_cluster(fig, f"2d_instantaneous_factors{clusterName}")
         plt.close(fig)
         
-        print("IMAGE URLS FOR CLUSTER")
-        print(cluster_image_urls)
+        # print("IMAGE URLS FOR CLUSTER")
+        # print(cluster_image_urls)
         image_urls.append(cluster_image_urls)
         #endregion
     
+        print(f"---- Cluster {tv+1} END ----")
+        print("")
+        print("")
+        print("")
     # image_urls.append(cluster_image_urls)
+    print("---- All clusters Ran ----")
+    print("")
     #endregion
     
+    
+    print(f"Cluster DEBUG:")
+    print(f'Interest Array: {cluster_interest}')
+    print(f'Interest Count: {cluster_interest_count}')
+    print(f'Cultural Array: {cluster_interest}')
+    print(f'Cultural count: {cluster_culture_count}')
+    print(f"Model Output: {cluster_behaviour}")
+    print("")
+    print("")
+    
+        
+        
+    print("")
+    print("")
+    print("")
+    print("")
+    print("--------------------------- SIMULATION END ---------------------------")
+    print("")
+    print("")
+    print("")
+    print("")
+    
     # Render the result.html template with the image URLs
-    return templates.TemplateResponse("result.html", {"request": request, "image_urls": image_urls, "interests": cluster_interest, "culture": cluster_culture})
+    return templates.TemplateResponse("result.html", {"request": request, "image_urls": image_urls, "interests": cluster_interest, "culture": cluster_culture, "content": cluster_content})
 
 #endregion
 

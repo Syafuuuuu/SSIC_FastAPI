@@ -1,8 +1,8 @@
-Ramadhan,2025-02-25,2025-03-24,ramadhan.mp4,islam
-Raya Adha,2025-06-05,2025-06-09,adha.mp4,islam
-Easter,2025-04-15,2025-04-20,easter.mp4,christian
-Thaipusam,2025-02-09,2025-02-11,https://www.youtube.com/embed/dAPpqWQM7Nc,hindu
-Ponggal,2025-01-14,2025-01-17,https://www.youtube.com/embed/sQeL0fP9RIc,hindu
-Wesak,2025-05-10,2025-05-12,wesak.mp4,bhudist
-Mooncake Festival,2025-10-04,2025-10-06,mooncakefestival.mp4,budhist
-Winter Solstice,2025-12-20,2025-12-22,wintersolstice.mp4,budhist
+Ramadhan,2025-02-25,2025-03-24,ramadhan.mp4,0
+Raya Adha,2025-06-05,2025-06-09,adha.mp4,0
+Easter,2025-04-15,2025-04-20,easter.mp4,1
+Thaipusam,2025-02-09,2025-02-11,https://www.youtube.com/embed/dAPpqWQM7Nc,3
+Ponggal,2025-01-14,2025-01-17,https://www.youtube.com/embed/sQeL0fP9RIc,3
+Wesak,2025-05-10,2025-05-12,wesak.mp4,2
+Mooncake Festival,2025-10-04,2025-10-06,mooncakefestival.mp4,2
+Winter Solstice,2025-12-20,2025-12-22,wintersolstice.mp4,2

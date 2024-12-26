@@ -18,9 +18,20 @@
             display: none;
         }
 
-        /* Likert Scale Styling */
-        .likert-scale label {
-            margin-right: 10px;
+        .likert-scale-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        .likert-scale-table th,
+        .likert-scale-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .likert-scale-table th {
+            background-color: #f2f2f2;
         }
 
         .likert-scale input[type="radio"] {
@@ -28,402 +39,468 @@
             position: relative;
             top: -2px;
         }
+
+        h2 {
+            font-size: 2em;
+            font-weight: 700;
+            color: #e2e2e2;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #1a1a1a;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 1.2em;
+            color: #a8a8a8;
+            display: block;
+        }
+
+        .sidebar .active {
+            color: #86ffb6;
+        }
+
+        .sidebar a:hover {
+            color: #ffffff;
+        }
+
+        .main-content {
+            margin-left: 210px;
+            padding: 20px;
+        }
     </style>
 
 </head>
 
-<body>
-    <div class="container my-5">
-        <h2 class="text-center mb-4">User Registration</h2>
+<body class="bg-dark">
+    <div class="sidebar">
+        <a href="/simhome">Home</a>
+        <a href="/register" class="active">Register</a>
+    </div>
+    <div class="main-content">
+        <div class="container my-5">
+            <h2 class="text-center mb-4">User Registration</h2>
 
-        <!-- Progress Bar -->
-        <div class="progress-container">
-            <div class="progress">
-                <div class="progress-bar" role="progressbar" style="width: 20%;" id="progressBar">Step 1 of 5</div>
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 20%;" id="progressBar">Step 1 of 5</div>
+                </div>
             </div>
+
+            <!-- Multi-Page Form -->
+            <form method="POST" action="/submit/">
+
+                <!-- Page 1: Personal Information -->
+                <div class="tab">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Personal Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>Please select the languages you speak:</p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lang1" name="Language" value="1">
+                                <label class="form-check-label" for="lang1">English</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lang2" name="Language" value="2">
+                                <label class="form-check-label" for="lang2">Malay</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lang3" name="Language" value="3">
+                                <label class="form-check-label" for="lang3">Mandarin</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lang4" name="Language" value="4">
+                                <label class="form-check-label" for="lang4">Tamil</label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>Please select your race:</p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="race1" name="Race" value="1">
+                                <label class="form-check-label" for="race1">Malay</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="race2" name="Race" value="2">
+                                <label class="form-check-label" for="race2">Chinese</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="race3" name="Race" value="3">
+                                <label class="form-check-label" for="race3">Indian</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="race4" name="Race" value="4">
+                                <label class="form-check-label" for="race4">Others</label>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>Please select your religion:</p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="rel1" name="Religion" value="1">
+                                <label class="form-check-label" for="rel1">Islam</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="rel2" name="Religion" value="2">
+                                <label class="form-check-label" for="rel2">Christianity</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="rel3" name="Religion" value="3">
+                                <label class="form-check-label" for="rel3">Buddhism</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="rel4" name="Religion" value="4">
+                                <label class="form-check-label" for="rel4">Hinduism</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
+                </div>
+
+                <!-- Page 2: Personality Traits -->
+                <div class="tab hidden">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Personality Traits</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Extraversion -->
+                            <div class="mb-3">
+                                <label class="form-label">I see myself as someone who is reserved:</label>
+                                <table class="likert-scale-table">
+                                    <tr>
+                                        <th>Disagree strongly</th>
+                                        <th>Disagree a little</th>
+                                        <th>Neither agree nor disagree</th>
+                                        <th>Agree a little</th>
+                                        <th>Agree strongly</th>
+                                    </tr>
+                                    <tr class="likert-scale">
+                                        <td><input class="form-check-input" type="radio" name="Ex1R" id="Ex1R"
+                                                value="1"></td>
+                                        <td><input class="form-check-input" type="radio" name="Ex1R" id="Ex2R"
+                                                value="2"></td>
+                                        <td><input class="form-check-input" type="radio" name="Ex1R" id="Ex3R"
+                                                value="3"></td>
+                                        <td><input class="form-check-input" type="radio" name="Ex1R" id="Ex4R"
+                                                value="4"></td>
+                                        <td><input class="form-check-input" type="radio" name="Ex1R" id="Ex5R"
+                                                value="5"></td>
+                                    </tr>
+                                </table>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <label class="form-check-label" for="Ex1R">Disagree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Ex1R" id="Ex1R" value="1">
+                                    <label class="form-check-label" for="Ex2R">Disagree a little</label>
+                                    <input class="form-check-input" type="radio" name="Ex1R" id="Ex2R" value="2">
+                                    <label class="form-check-label" for="Ex3R">Neither agree nor disagree</label>
+                                    <input class="form-check-input" type="radio" name="Ex1R" id="Ex3R" value="3">
+                                    <label class="form-check-label" for="Ex4R">Agree a little</label>
+                                    <input class="form-check-input" type="radio" name="Ex1R" id="Ex4R" value="4">
+                                    <label class="form-check-label" for="Ex5R">Agree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Ex1R" id="Ex5R" value="5">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">I see myself as someone who is outgoing, sociable:</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <label class="form-check-label" for="Ex6">Disagree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Ex6" id="Ex6" value="1">
+                                    <label class="form-check-label" for="Ex7">Disagree a little</label>
+                                    <input class="form-check-input" type="radio" name="Ex6" id="Ex7" value="2">
+                                    <label class="form-check-label" for="Ex8">Neither agree nor disagree</label>
+                                    <input class="form-check-input" type="radio" name="Ex6" id="Ex8" value="3">
+                                    <label class="form-check-label" for="Ex9">Agree a little</label>
+                                    <input class="form-check-input" type="radio" name="Ex6" id="Ex9" value="4">
+                                    <label class="form-check-label" for="Ex10">Agree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Ex6" id="Ex10" value="5">
+                                </div>
+                            </div>
+
+                            <!-- Openness to Experience -->
+                            <div class="mb-3">
+                                <label class="form-label">I see myself as someone who has few artistic
+                                    interests:</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <label class="form-check-label" for="Op5R">Disagree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Op5R" id="Op5R" value="1">
+                                    <label class="form-check-label" for="Op6R">Disagree a little</label>
+                                    <input class="form-check-input" type="radio" name="Op5R" id="Op6R" value="2">
+                                    <label class="form-check-label" for="Op7R">Neither agree nor disagree</label>
+                                    <input class="form-check-input" type="radio" name="Op5R" id="Op7R" value="3">
+                                    <label class="form-check-label" for="Op8R">Agree a little</label>
+                                    <input class="form-check-input" type="radio" name="Op5R" id="Op8R" value="4">
+                                    <label class="form-check-label" for="Op9R">Agree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Op5R" id="Op9R" value="5">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">I see myself as someone who has an active imagination:</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <label class="form-check-label" for="Op10">Disagree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Op10" id="Op10" value="1">
+                                    <label class="form-check-label" for="Op11">Disagree a little</label>
+                                    <input class="form-check-input" type="radio" name="Op10" id="Op11" value="2">
+                                    <label class="form-check-label" for="Op12">Neither agree nor disagree</label>
+                                    <input class="form-check-input" type="radio" name="Op10" id="Op12" value="3">
+                                    <label class="form-check-label" for="Op13">Agree a little</label>
+                                    <input class="form-check-input" type="radio" name="Op10" id="Op13" value="4">
+                                    <label class="form-check-label" for="Op14">Agree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Op10" id="Op14" value="5">
+                                </div>
+                            </div>
+
+                            <!-- Neuroticism -->
+                            <div class="mb-3">
+                                <label class="form-label">I see myself as someone who is relaxed, handles stress
+                                    well:</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <label class="form-check-label" for="Nu4R">Disagree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Nu4R" id="Nu4R" value="1">
+                                    <label class="form-check-label" for="Nu5R">Disagree a little</label>
+                                    <input class="form-check-input" type="radio" name="Nu4R" id="Nu5R" value="2">
+                                    <label class="form-check-label" for="Nu6R">Neither agree nor disagree</label>
+                                    <input class="form-check-input" type="radio" name="Nu4R" id="Nu6R" value="3">
+                                    <label class="form-check-label" for="Nu7R">Agree a little</label>
+                                    <input class="form-check-input" type="radio" name="Nu4R" id="Nu7R" value="4">
+                                    <label class="form-check-label" for="Nu8R">Agree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Nu4R" id="Nu8R" value="5">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">I see myself as someone who gets nervous easily:</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <label class="form-check-label" for="Nu9_1">Disagree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Nu9" id="Nu9_1" value="1">
+                                    <label class="form-check-label" for="Nu9_2">Disagree a little</label>
+                                    <input class="form-check-input" type="radio" name="Nu9" id="Nu9_2" value="2">
+                                    <label class="form-check-label" for="Nu9_3">Neither agree nor disagree</label>
+                                    <input class="form-check-input" type="radio" name="Nu9" id="Nu9_3" value="3">
+                                    <label class="form-check-label" for="Nu9_4">Agree a little</label>
+                                    <input class="form-check-input" type="radio" name="Nu9" id="Nu9_4" value="4">
+                                    <label class="form-check-label" for="Nu9_5">Agree strongly</label>
+                                    <input class="form-check-input" type="radio" name="Nu9" id="Nu9_5" value="5">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
+                    <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
+                </div>
+
+
+                <!-- Add other pages (3, 4, 5) here similarly -->
+
+                <!-- Page 3: Emotions & Exhaustion -->
+                <div class="tab hidden">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Emotions & Exhaustion</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Happiness -->
+                            <div class="mb-3">
+                                <label class="form-label">At this moment, how happy do you feel?</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <input class="form-check-input" type="radio" name="Ha" id="Ha1" value="0">
+                                    <label class="form-check-label" for="Ha1">Not at all happy</label>
+
+                                    <input class="form-check-input" type="radio" name="Ha" id="Ha2" value="0.25">
+                                    <label class="form-check-label" for="Ha2">Slightly happy</label>
+
+                                    <input class="form-check-input" type="radio" name="Ha" id="Ha3" value="0.5">
+                                    <label class="form-check-label" for="Ha3">Moderately happy</label>
+
+                                    <input class="form-check-input" type="radio" name="Ha" id="Ha4" value="0.75">
+                                    <label class="form-check-label" for="Ha4">Very happy</label>
+
+                                    <input class="form-check-input" type="radio" name="Ha" id="Ha5" value="1">
+                                    <label class="form-check-label" for="Ha5">Extremely happy</label>
+                                </div>
+                            </div>
+
+                            <!-- Sadness -->
+                            <div class="mb-3">
+                                <label class="form-label">At this moment, how sad do you feel?</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <input class="form-check-input" type="radio" name="Sd" id="Sd1" value="0">
+                                    <label class="form-check-label" for="Sd1">Not at all sad</label>
+
+                                    <input class="form-check-input" type="radio" name="Sd" id="Sd2" value="0.25">
+                                    <label class="form-check-label" for="Sd2">Slightly sad</label>
+
+                                    <input class="form-check-input" type="radio" name="Sd" id="Sd3" value="0.5">
+                                    <label class="form-check-label" for="Sd3">Moderately sad</label>
+
+                                    <input class="form-check-input" type="radio" name="Sd" id="Sd4" value="0.75">
+                                    <label class="form-check-label" for="Sd4">Very sad</label>
+
+                                    <input class="form-check-input" type="radio" name="Sd" id="Sd5" value="1">
+                                    <label class="form-check-label" for="Sd5">Extremely sad</label>
+                                </div>
+                            </div>
+
+                            <!-- Fear -->
+                            <div class="mb-3">
+                                <label class="form-label">At this moment, how fearful or anxious do you feel?</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <input class="form-check-input" type="radio" name="Fe" id="Fe1" value="0">
+                                    <label class="form-check-label" for="Fe1">Not at all fearful/anxious</label>
+
+                                    <input class="form-check-input" type="radio" name="Fe" id="Fe2" value="0.25">
+                                    <label class="form-check-label" for="Fe2">Slightly fearful/anxious</label>
+
+                                    <input class="form-check-input" type="radio" name="Fe" id="Fe3" value="0.5">
+                                    <label class="form-check-label" for="Fe3">Moderately fearful/anxious</label>
+
+                                    <input class="form-check-input" type="radio" name="Fe" id="Fe4" value="0.75">
+                                    <label class="form-check-label" for="Fe4">Very fearful/anxious</label>
+
+                                    <input class="form-check-input" type="radio" name="Fe" id="Fe5" value="1">
+                                    <label class="form-check-label" for="Fe5">Extremely fearful/anxious</label>
+                                </div>
+                            </div>
+
+                            <!-- Exhaustion -->
+                            <div class="mb-3">
+                                <label class="form-label">At this moment, how exhausted do you feel?</label>
+                                <div class="d-flex justify-content-between likert-scale">
+                                    <input class="form-check-input" type="radio" name="Eh" id="Eh1" value="0">
+                                    <label class="form-check-label" for="Eh1">Not at all exhausted</label>
+
+                                    <input class="form-check-input" type="radio" name="Eh" id="Eh2" value="0.25">
+                                    <label class="form-check-label" for="Eh2">Slightly exhausted</label>
+
+                                    <input class="form-check-input" type="radio" name="Eh" id="Eh3" value="0.5">
+                                    <label class="form-check-label" for="Eh3">Moderately exhausted</label>
+
+                                    <input class="form-check-input" type="radio" name="Eh" id="Eh4" value="0.75">
+                                    <label class="form-check-label" for="Eh4">Very exhausted</label>
+
+                                    <input class="form-check-input" type="radio" name="Eh" id="Eh5" value="1">
+                                    <label class="form-check-label" for="Eh5">Extremely exhausted</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
+                    <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
+                </div>
+
+
+                <!-- Page 4: Hobbies -->
+                <div class="tab hidden">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Hobbies</h4>
+                        </div>
+                        <div class="card-body">
+                            <p>Do you like:</p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="hob1" name="HobbArr">
+                                <label class="form-check-label" for="hob1">Doing cognitive activities (e.g.,
+                                    puzzles, reading)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="2" id="hob2" name="HobbArr">
+                                <label class="form-check-label" for="hob2">Doing cultural activities (e.g.,
+                                    visiting museums, attending theater)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="3" id="hob3" name="HobbArr">
+                                <label class="form-check-label" for="hob3">Participating in religious activities
+                                    (e.g., attending services, volunteering at religious organizations)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="4" id="hob4" name="HobbArr">
+                                <label class="form-check-label" for="hob4">Engaging in social activities (e.g.,
+                                    going out with friends, social clubs)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="5" id="hob5" name="HobbArr">
+                                <label class="form-check-label" for="hob5">Gardening (e.g., growing plants,
+                                    landscaping)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="6" id="hob6" name="HobbArr">
+                                <label class="form-check-label" for="hob6">Traveling (e.g., exploring new
+                                    places, experiencing different cultures)?</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
+                    <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
+                </div>
+
+
+                <!-- Page 5: Interests -->
+                <div class="tab hidden">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Interests</h4>
+                        </div>
+                        <div class="card-body">
+                            <p>Are you interested :</p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="int1" name="IntArr">
+                                <label class="form-check-label" for="int1">Realistic activities (e.g.,
+                                    working with tools or machinery)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="2" id="int2" name="IntArr">
+                                <label class="form-check-label" for="int2">Investigative activities
+                                    (e.g., solving puzzles, conducting experiments)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="3" id="int3" name="IntArr">
+                                <label class="form-check-label" for="int3">Artistic activities (e.g.,
+                                    painting, writing)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="4" id="int4" name="IntArr">
+                                <label class="form-check-label" for="int4">Social activities (e.g.,
+                                    teaching, counseling)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="5" id="int5" name="IntArr">
+                                <label class="form-check-label" for="int5">Enterprising activities
+                                    (e.g., managing, selling)?</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="6" id="int6" name="IntArr">
+                                <label class="form-check-label" for="int6">Conventional activities
+                                    (e.g., organizing, record-keeping)?</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
+                    <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
+                </div>
+
+                <!-- Submit Button on the last page -->
+                <div class="tab hidden">
+                    <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+
+            </form>
         </div>
-
-        <!-- Multi-Page Form -->
-        <form method="POST" action="/submit/">
-
-            <!-- Page 1: Personal Information -->
-            <div class="tab">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4>Personal Information</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-4">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p>Please select the languages you speak:</p>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="lang1" name="Language" value="1">
-                            <label class="form-check-label" for="lang1">English</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="lang2" name="Language" value="2">
-                            <label class="form-check-label" for="lang2">Malay</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="lang3" name="Language" value="3">
-                            <label class="form-check-label" for="lang3">Mandarin</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="lang4" name="Language" value="4">
-                            <label class="form-check-label" for="lang4">Tamil</label>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p>Please select your race:</p>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="race1" name="Race" value="1">
-                            <label class="form-check-label" for="race1">Malay</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="race2" name="Race" value="2">
-                            <label class="form-check-label" for="race2">Chinese</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="race3" name="Race" value="3">
-                            <label class="form-check-label" for="race3">Indian</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="race4" name="Race" value="4">
-                            <label class="form-check-label" for="race4">Others</label>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p>Please select your religion:</p>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="rel1" name="Religion" value="1">
-                            <label class="form-check-label" for="rel1">Islam</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="rel2" name="Religion" value="2">
-                            <label class="form-check-label" for="rel2">Christianity</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="rel3" name="Religion" value="3">
-                            <label class="form-check-label" for="rel3">Buddhism</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="rel4" name="Religion" value="4">
-                            <label class="form-check-label" for="rel4">Hinduism</label>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
-            </div>
-
-            <!-- Page 2: Personality Traits -->
-            <div class="tab hidden">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4>Personality Traits</h4>
-                    </div>
-                    <div class="card-body">
-                        <!-- Extraversion -->
-                        <div class="mb-3">
-                            <label class="form-label">I see myself as someone who is reserved:</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <label class="form-check-label" for="Ex1R">Disagree strongly</label>
-                                <input class="form-check-input" type="radio" name="Ex1R" id="Ex1R" value="1">
-                                <label class="form-check-label" for="Ex2R">Disagree a little</label>
-                                <input class="form-check-input" type="radio" name="Ex1R" id="Ex2R" value="2">
-                                <label class="form-check-label" for="Ex3R">Neither agree nor disagree</label>
-                                <input class="form-check-input" type="radio" name="Ex1R" id="Ex3R" value="3">
-                                <label class="form-check-label" for="Ex4R">Agree a little</label>
-                                <input class="form-check-input" type="radio" name="Ex1R" id="Ex4R" value="4">
-                                <label class="form-check-label" for="Ex5R">Agree strongly</label>
-                                <input class="form-check-input" type="radio" name="Ex1R" id="Ex5R" value="5">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">I see myself as someone who is outgoing, sociable:</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <label class="form-check-label" for="Ex6">Disagree strongly</label>
-                                <input class="form-check-input" type="radio" name="Ex6" id="Ex6" value="1">
-                                <label class="form-check-label" for="Ex7">Disagree a little</label>
-                                <input class="form-check-input" type="radio" name="Ex6" id="Ex7" value="2">
-                                <label class="form-check-label" for="Ex8">Neither agree nor disagree</label>
-                                <input class="form-check-input" type="radio" name="Ex6" id="Ex8" value="3">
-                                <label class="form-check-label" for="Ex9">Agree a little</label>
-                                <input class="form-check-input" type="radio" name="Ex6" id="Ex9" value="4">
-                                <label class="form-check-label" for="Ex10">Agree strongly</label>
-                                <input class="form-check-input" type="radio" name="Ex6" id="Ex10" value="5">
-                            </div>
-                        </div>
-
-                        <!-- Openness to Experience -->
-                        <div class="mb-3">
-                            <label class="form-label">I see myself as someone who has few artistic interests:</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <label class="form-check-label" for="Op5R">Disagree strongly</label>
-                                <input class="form-check-input" type="radio" name="Op5R" id="Op5R" value="1">
-                                <label class="form-check-label" for="Op6R">Disagree a little</label>
-                                <input class="form-check-input" type="radio" name="Op5R" id="Op6R" value="2">
-                                <label class="form-check-label" for="Op7R">Neither agree nor disagree</label>
-                                <input class="form-check-input" type="radio" name="Op5R" id="Op7R" value="3">
-                                <label class="form-check-label" for="Op8R">Agree a little</label>
-                                <input class="form-check-input" type="radio" name="Op5R" id="Op8R" value="4">
-                                <label class="form-check-label" for="Op9R">Agree strongly</label>
-                                <input class="form-check-input" type="radio" name="Op5R" id="Op9R" value="5">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">I see myself as someone who has an active imagination:</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <label class="form-check-label" for="Op10">Disagree strongly</label>
-                                <input class="form-check-input" type="radio" name="Op10" id="Op10" value="1">
-                                <label class="form-check-label" for="Op11">Disagree a little</label>
-                                <input class="form-check-input" type="radio" name="Op10" id="Op11" value="2">
-                                <label class="form-check-label" for="Op12">Neither agree nor disagree</label>
-                                <input class="form-check-input" type="radio" name="Op10" id="Op12" value="3">
-                                <label class="form-check-label" for="Op13">Agree a little</label>
-                                <input class="form-check-input" type="radio" name="Op10" id="Op13" value="4">
-                                <label class="form-check-label" for="Op14">Agree strongly</label>
-                                <input class="form-check-input" type="radio" name="Op10" id="Op14" value="5">
-                            </div>
-                        </div>
-
-                        <!-- Neuroticism -->
-                        <div class="mb-3">
-                            <label class="form-label">I see myself as someone who is relaxed, handles stress
-                                well:</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <label class="form-check-label" for="Nu4R">Disagree strongly</label>
-                                <input class="form-check-input" type="radio" name="Nu4R" id="Nu4R" value="1">
-                                <label class="form-check-label" for="Nu5R">Disagree a little</label>
-                                <input class="form-check-input" type="radio" name="Nu4R" id="Nu5R" value="2">
-                                <label class="form-check-label" for="Nu6R">Neither agree nor disagree</label>
-                                <input class="form-check-input" type="radio" name="Nu4R" id="Nu6R" value="3">
-                                <label class="form-check-label" for="Nu7R">Agree a little</label>
-                                <input class="form-check-input" type="radio" name="Nu4R" id="Nu7R" value="4">
-                                <label class="form-check-label" for="Nu8R">Agree strongly</label>
-                                <input class="form-check-input" type="radio" name="Nu4R" id="Nu8R" value="5">
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">I see myself as someone who gets nervous easily:</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <label class="form-check-label" for="Nu9_1">Disagree strongly</label>
-                                <input class="form-check-input" type="radio" name="Nu9" id="Nu9_1" value="1">
-                                <label class="form-check-label" for="Nu9_2">Disagree a little</label>
-                                <input class="form-check-input" type="radio" name="Nu9" id="Nu9_2" value="2">
-                                <label class="form-check-label" for="Nu9_3">Neither agree nor disagree</label>
-                                <input class="form-check-input" type="radio" name="Nu9" id="Nu9_3" value="3">
-                                <label class="form-check-label" for="Nu9_4">Agree a little</label>
-                                <input class="form-check-input" type="radio" name="Nu9" id="Nu9_4" value="4">
-                                <label class="form-check-label" for="Nu9_5">Agree strongly</label>
-                                <input class="form-check-input" type="radio" name="Nu9" id="Nu9_5" value="5">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
-                <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
-            </div>
-
-
-            <!-- Add other pages (3, 4, 5) here similarly -->
-
-            <!-- Page 3: Emotions & Exhaustion -->
-            <div class="tab hidden">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4>Emotions & Exhaustion</h4>
-                    </div>
-                    <div class="card-body">
-                        <!-- Happiness -->
-                        <div class="mb-3">
-                            <label class="form-label">At this moment, how happy do you feel?</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <input class="form-check-input" type="radio" name="Ha" id="Ha1" value="0">
-                                <label class="form-check-label" for="Ha1">Not at all happy</label>
-
-                                <input class="form-check-input" type="radio" name="Ha" id="Ha2" value="0.25">
-                                <label class="form-check-label" for="Ha2">Slightly happy</label>
-
-                                <input class="form-check-input" type="radio" name="Ha" id="Ha3" value="0.5">
-                                <label class="form-check-label" for="Ha3">Moderately happy</label>
-
-                                <input class="form-check-input" type="radio" name="Ha" id="Ha4" value="0.75">
-                                <label class="form-check-label" for="Ha4">Very happy</label>
-
-                                <input class="form-check-input" type="radio" name="Ha" id="Ha5" value="1">
-                                <label class="form-check-label" for="Ha5">Extremely happy</label>
-                            </div>
-                        </div>
-
-                        <!-- Sadness -->
-                        <div class="mb-3">
-                            <label class="form-label">At this moment, how sad do you feel?</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <input class="form-check-input" type="radio" name="Sd" id="Sd1" value="0">
-                                <label class="form-check-label" for="Sd1">Not at all sad</label>
-
-                                <input class="form-check-input" type="radio" name="Sd" id="Sd2" value="0.25">
-                                <label class="form-check-label" for="Sd2">Slightly sad</label>
-
-                                <input class="form-check-input" type="radio" name="Sd" id="Sd3" value="0.5">
-                                <label class="form-check-label" for="Sd3">Moderately sad</label>
-
-                                <input class="form-check-input" type="radio" name="Sd" id="Sd4" value="0.75">
-                                <label class="form-check-label" for="Sd4">Very sad</label>
-
-                                <input class="form-check-input" type="radio" name="Sd" id="Sd5" value="1">
-                                <label class="form-check-label" for="Sd5">Extremely sad</label>
-                            </div>
-                        </div>
-
-                        <!-- Fear -->
-                        <div class="mb-3">
-                            <label class="form-label">At this moment, how fearful or anxious do you feel?</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <input class="form-check-input" type="radio" name="Fe" id="Fe1" value="0">
-                                <label class="form-check-label" for="Fe1">Not at all fearful/anxious</label>
-
-                                <input class="form-check-input" type="radio" name="Fe" id="Fe2" value="0.25">
-                                <label class="form-check-label" for="Fe2">Slightly fearful/anxious</label>
-
-                                <input class="form-check-input" type="radio" name="Fe" id="Fe3" value="0.5">
-                                <label class="form-check-label" for="Fe3">Moderately fearful/anxious</label>
-
-                                <input class="form-check-input" type="radio" name="Fe" id="Fe4" value="0.75">
-                                <label class="form-check-label" for="Fe4">Very fearful/anxious</label>
-
-                                <input class="form-check-input" type="radio" name="Fe" id="Fe5" value="1">
-                                <label class="form-check-label" for="Fe5">Extremely fearful/anxious</label>
-                            </div>
-                        </div>
-
-                        <!-- Exhaustion -->
-                        <div class="mb-3">
-                            <label class="form-label">At this moment, how exhausted do you feel?</label>
-                            <div class="d-flex justify-content-between likert-scale">
-                                <input class="form-check-input" type="radio" name="Eh" id="Eh1" value="0">
-                                <label class="form-check-label" for="Eh1">Not at all exhausted</label>
-
-                                <input class="form-check-input" type="radio" name="Eh" id="Eh2" value="0.25">
-                                <label class="form-check-label" for="Eh2">Slightly exhausted</label>
-
-                                <input class="form-check-input" type="radio" name="Eh" id="Eh3" value="0.5">
-                                <label class="form-check-label" for="Eh3">Moderately exhausted</label>
-
-                                <input class="form-check-input" type="radio" name="Eh" id="Eh4" value="0.75">
-                                <label class="form-check-label" for="Eh4">Very exhausted</label>
-
-                                <input class="form-check-input" type="radio" name="Eh" id="Eh5" value="1">
-                                <label class="form-check-label" for="Eh5">Extremely exhausted</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
-                <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
-            </div>
-
-
-            <!-- Page 4: Hobbies -->
-            <div class="tab hidden">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4>Hobbies</h4>
-                    </div>
-                    <div class="card-body">
-                        <p>Do you like:</p>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="1" id="hob1" name="HobbArr">
-                            <label class="form-check-label" for="hob1">Doing cognitive activities (e.g.,
-                                puzzles, reading)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="2" id="hob2" name="HobbArr">
-                            <label class="form-check-label" for="hob2">Doing cultural activities (e.g.,
-                                visiting museums, attending theater)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="3" id="hob3" name="HobbArr">
-                            <label class="form-check-label" for="hob3">Participating in religious activities
-                                (e.g., attending services, volunteering at religious organizations)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="4" id="hob4" name="HobbArr">
-                            <label class="form-check-label" for="hob4">Engaging in social activities (e.g.,
-                                going out with friends, social clubs)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="5" id="hob5" name="HobbArr">
-                            <label class="form-check-label" for="hob5">Gardening (e.g., growing plants,
-                                landscaping)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="6" id="hob6" name="HobbArr">
-                            <label class="form-check-label" for="hob6">Traveling (e.g., exploring new
-                                places, experiencing different cultures)?</label>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
-                <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
-            </div>
-
-
-            <!-- Page 5: Interests -->
-            <div class="tab hidden">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4>Interests</h4>
-                    </div>
-                    <div class="card-body">
-                        <p>Are you interested :</p>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="1" id="int1" name="IntArr">
-                            <label class="form-check-label" for="int1">Realistic activities (e.g.,
-                                working with tools or machinery)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="2" id="int2" name="IntArr">
-                            <label class="form-check-label" for="int2">Investigative activities
-                                (e.g., solving puzzles, conducting experiments)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="3" id="int3" name="IntArr">
-                            <label class="form-check-label" for="int3">Artistic activities (e.g.,
-                                painting, writing)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="4" id="int4" name="IntArr">
-                            <label class="form-check-label" for="int4">Social activities (e.g.,
-                                teaching, counseling)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="5" id="int5" name="IntArr">
-                            <label class="form-check-label" for="int5">Enterprising activities
-                                (e.g., managing, selling)?</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="6" id="int6" name="IntArr">
-                            <label class="form-check-label" for="int6">Conventional activities
-                                (e.g., organizing, record-keeping)?</label>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
-                <button type="button" class="btn btn-primary" onclick="nextTab()">Next</button>
-            </div>
-
-            <!-- Submit Button on the last page -->
-            <div class="tab hidden">
-                <button type="button" class="btn btn-secondary" onclick="prevTab()">Previous</button>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </div>
-
-        </form>
     </div>
 
     <script>

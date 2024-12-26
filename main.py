@@ -1,4 +1,5 @@
 from collections import defaultdict
+import random
 from fastapi import FastAPI, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import create_engine, Column, Integer, String, Float
@@ -55,65 +56,6 @@ def translate(input):
         case 4:
             return [0,0,0,1]
 
-#Festivities
-Festival = namedtuple('Festival', ['name','start_date','end_date', 'video', 'culture'])
-
-def read_festivals_from_file(file_path): 
-    festivals = [] 
-    with open(file_path, 'r') as file: 
-        for line in file: 
-            parts = line.strip().split(',')
-            
-            if (len(parts) == 5):
-                name, start_date, end_date, video, culture = parts
-                festivals.append(Festival(name, start_date, end_date, video, culture))
-            else:
-                name, start_date, end_date, video = parts
-                festivals.append(Festival(name, start_date, end_date, video, None))                
-            
-    # print(festivals)
-    return festivals
-    
-def has_extrovert(agent_behaviour, type):
-    for agent in enumerate(agent_behaviour):
-        #   Li = agent[1]
-        if(type=="ready"):
-            pos = 0
-        if(type=="willing"):
-            pos = 1
-        if(agent[pos]>=0.5):
-            return True
-    return False
-
-def extrovert_index(agent_behaviour):
-    ready_to_interact_index = []
-    willing_to_interact_index = []
-    for index, agent in enumerate(agent_behaviour):
-        #   Ri = agent[0]
-        #   Li = agent[1]
-        if(agent[0]>=0.5):
-            ready_to_interact_index.append[index]
-        if(agent[1]>=0.5):
-            willing_to_interact_index.append[index]
-    return ready_to_interact_index, willing_to_interact_index
-
-
-def Gate4(date_str, festivals):
-    input_date = datetime.strptime(date_str, "%Y-%m-%d")
-    
-    #Check whole general festival dates
-    for festival in festivals:
-        start_date = datetime.strptime(festival.start_date, "%Y-%m-%d")
-        end_date = datetime.strptime(festival.end_date, "%Y-%m-%d")
-        
-        #if it falls on a specific festival
-        if start_date <= input_date <= end_date: 
-            #return details of that festival
-            return True, festival.video
-    
-    return False, ""
-
-
 def Gate2(date_str, festivals):
     input_date = datetime.strptime(date_str, "%Y-%m-%d")
     
@@ -131,13 +73,25 @@ def Gate2(date_str, festivals):
     
     return False, "", ""
   
-    
+#Check for 3 things    
 def Gate1(agent_behaviour, agent_int, agent_cult, int_count, int_avg, cult_count, cult_avg):
     
-    if(not has_extrovert(agent_behaviour=agent_behaviour, type="willing")):
-        return False
+    flag = False
+    content = ""
     
-    Ri_index, Li_index = extrovert_index(agent_behaviour=agent_behaviour)
+    #Check if there is 2 or more agents willing to interact and check
+    # if((has_extrovert(agent_behaviour=agent_behaviour,type='willing') >= 2) or (has_extrovert(agent_behaviour=agent_behaviour,type='ready') >= 1)):
+        # return flag, content
+        
+    
+    #Check if there are extroverts (Ready to Interact) are present
+    #   If got, check if those extroverts are interested in the 
+    
+    #Check if they speak the same language (culture)
+    #   If they dont, default to eng/bm
+    #   If they do, change content to that language
+    
+    # Ri_index, Li_index = extrovert_index(agent_behaviour=agent_behaviour)
     # if 
     
     
@@ -148,46 +102,260 @@ def Gate1(agent_behaviour, agent_int, agent_cult, int_count, int_avg, cult_count
 #Decision Model
 def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_culture, culture_count, interest_arr, culture_arr):
     
+    print("")
+    print("")
+    print("")
+    print("----------- | Decision Model Input | -----------")
+    print(f"Date: {date}")
+    print(f"Agent Behaviour: {agent_behaviour}")
+    print(f"Interest Array: {agent_interest}")
+    print(f"Interest Count: {interest_count}")
+    print(f"Interest OR Values: {interest_arr}")
+    print(f"Culture Array: {agent_culture}")
+    print(f"Culture Count: {culture_count}")
+    print(f"Culture OR Values: {culture_arr}")
+    print("----------- | Decision Model Input | -----------")
+    print("")
+    print("")
+    print("")
+    
+    #Festivities
+    Festival = namedtuple('Festival', ['name','start_date','end_date', 'video', 'culture'])
+    
+    #Interest Video
+    IntVid = namedtuple('IntVid', ['interest','lang','vidURL'])
+    
+    def read_festivals_from_file(file_path): 
+        festivals = [] 
+        with open(file_path, 'r') as file: 
+            for line in file: 
+                parts = line.strip().split(',')
+                
+                if (len(parts) == 5):
+                    name, start_date, end_date, video, culture = parts
+                    festivals.append(Festival(name, start_date, end_date, video, culture))
+                else:
+                    name, start_date, end_date, video = parts
+                    festivals.append(Festival(name, start_date, end_date, video, None))                
+                
+        # print(festivals)
+        return festivals
+        
+    def festival_checker(date_str, festivals):
+        input_date = datetime.strptime(date_str, "%Y-%m-%d")
+        
+        #Check whole general festival dates
+        for festival in festivals:
+            start_date = datetime.strptime(festival.start_date, "%Y-%m-%d")
+            end_date = datetime.strptime(festival.end_date, "%Y-%m-%d")
+            
+            #if it falls on a specific festival
+            if start_date <= input_date <= end_date: 
+                
+                #return details of that festival
+                return True, festival.culture, festival.video
+        
+        return False, "", ""
+
+    def read_interest_video_from_file(file_path): 
+        
+        #Interest Video
+        IntVid = namedtuple('IntVid', ['interest','lang','vidURL'])
+        
+        interests_vids = [] 
+        with open(file_path, 'r') as file: 
+            for line in file: 
+                parts = line.strip().split(',')
+                
+                interest, lang, vidURL = parts
+                interests_vids.append(IntVid(interest, lang, vidURL))
+             
+                
+        return interests_vids
+
+    def interest_vid_decider(interest_index, lang_index, video_arr):
+        for interest_video in video_arr:
+            
+            if((int(interest_index)==int(interest_video.interest)) and (int(lang_index)==int(interest_video.lang))):
+                return interest_video.vidURL
+            
+        return "No such video"
+        
+
+    def AND_func(array1, array2):
+        return [a and b for a, b in zip(array1, array2)]
+    
+    def highest_count(interest_count):
+        # Find the maximum count
+        max_count = max(interest_count)
+        # Find all indices with the maximum count
+        highest_indices = [index for index, count in enumerate(interest_count) if count == max_count]
+        return highest_indices
+    
+    def has_extrovert(agent_behaviour, type):
+        print("Enter has_extrovert()")
+        count = 0
+        #Set type of check
+        if(type=="ready"):  #   Ri = agent[0]
+            pos = 0
+        if(type=="willing"):#   Li = agent[1]
+            pos = 1
+               
+        print(f"Passed type check: {pos}")
+                
+        for agent in agent_behaviour:
+            #Cout how many willing/ready extroverts
+            print(f"Agent[pos] = {agent[pos]}")
+            if(agent[pos]>=0.5):
+                count = count + 1
+        
+        return count
+
+    def extrovert_index(agent_behaviour):
+        ready_to_interact_index = []
+        willing_to_interact_index = []
+        for index, agent in enumerate(agent_behaviour):
+            #   Ri = agent[0]
+            #   Li = agent[1]
+            if(agent[0]>=0.5):
+                ready_to_interact_index.append(index)
+            if(agent[1]>=0.5):
+                willing_to_interact_index.append(index)
+                
+        return ready_to_interact_index, willing_to_interact_index
+    
+    def has_common(ready_index, willing_index, subject_arr, start=None, end=None):
+        
+        flag = False
+        index_of_highest_subj = -1
+        
+        print("")
+        print("Debug")
+        print(f"Subject: {subject_arr}")
+        print(f"Example of subj: {subject_arr[0]}")
+        print(f"Start: {start}")
+        print(f"End: {end}")
+        print(f"Processed Array: {subject_arr[0][start:end]}")
+        
+        for i in ready_index:
+            for j in willing_index:
+                
+                if(i==j):
+                    continue
+                if(start==None and end==None):
+                    and_result = AND_func(subject_arr[i], subject_arr[j])
+                else:
+                    and_result = AND_func(subject_arr[i][start:end], subject_arr[j][start:end])
+                
+                # Increment the count for each similar interest
+                for index, value in enumerate(and_result):
+                    if value:
+                        interest_count[index] += 1 
+                        flag = True            
+        
+        index_of_highest_subj = highest_count(interest_count)
+        
+        return flag, index_of_highest_subj
+    
+    def check_cult_fest_match(rel_arr, fest_index):
+        print(f"Rel Arr: {rel_arr}")
+        for rel in rel_arr:
+            if(int(rel)==int(fest_index)):
+                return True
+            
+        return False
+    
     contentURL = ""
     
-    #Gate 1: General Festival
-    Gate1Flag, Gate1Video = Gate1(date, read_festivals_from_file("./static/gen_fest.txt"))
+    #Check if there is an overlap of general festivals
+    overlaps_gen_fest, festival_cult, gen_fest_url = festival_checker(date, read_festivals_from_file("./static/gen_fest.txt"))
+
     
-    #Gate 2: Cultural Festivals
-    Gate2Flag, Gate2Video, Gate2Culture = Gate2(date, read_festivals_from_file("./static/cult_fest.txt"))
+    print(f"Willing: {has_extrovert(agent_behaviour=agent_behaviour, type='willing')}")
+    print(f"Ready: {has_extrovert(agent_behaviour=agent_behaviour, type='ready')}")
     
-    #Gate 3: Interest + Language + Trend
-    Gate3Flag = False
-    
-    #Gate 4: Interest + Trend
-    Gate4Flag = False
-    
-    #Gate 1: General Festival    
-    if(Gate1Flag):      #Checks for general festival dates
-        print("General Festival code")
-        print(f"The video: {Gate1Video}")
-        contentURL = Gate1Video
+    #If there is agents willing or ready to interact do below: 
+    if((has_extrovert(agent_behaviour=agent_behaviour, type='willing')>= 2) and has_extrovert(agent_behaviour=agent_behaviour, type='ready')>=1):
+
+        # CONTENT CHECKER
+        print("******* CONTENT CHECKING ********")
+        lang_index = -1
         
-    #Gate 2: Cultural Festivals
-    elif(Gate2Flag):    #Checks for cultural festivals with respect to culture (religion)                            
-        print("Cultural Festival code")
-        print(f"Video: {Gate2Video}")
-        print(f"Part of culture: {Gate2Culture}")
-        contentURL = Gate2Video
-    
-    #Gate 3: With respect to language - Interest vs Trend
-    elif(Gate3Flag): 
-        print("Interest/Trend in cluster Language")
+        #Check if there is a high similarity in interest value between 2 or more people    
+        Ri_index, Li_index = extrovert_index(agent_behaviour=agent_behaviour)
+        print("---- Similarity Index ----")
+        print(f"Ri Index: {Ri_index}")
+        print(f"Li Index: {Li_index}")
         
-    #Gate 4: Interest vs Trend
-    elif(Gate4Flag):
-        print("Interest in any langauge")
+        # LANG CHECKER
+        print("******* LANGUAGE CHECKING ********")
+        lang_flag, lang_index = has_common(ready_index=Ri_index, willing_index=Li_index, subject_arr=agent_culture, start=0, end=4)
         
-    #Gate 5: Trend in any language
+        print(f"Language Flag: {lang_flag}")
+        print(f"Language Indexes: {lang_index}")
+        
+        print("******* INTEREST CHECKING ********")
+        has_common_interest_flag, interest_index = has_common(ready_index=Ri_index, willing_index=Li_index, subject_arr=agent_interest)
+        
+        #IF yes do below:
+        if(has_common_interest_flag):
+            
+            selected_lang = random.choice(lang_index)
+            selected_int = random.choice(interest_index)
+            
+            print(f"Interest Index of {interest_index}, the value {selected_int} was selected")
+            print(f"Language Index of {lang_index}, the value {selected_lang} was selected")
+            
+            #Select randomly what interest video to play
+            contentURL=interest_vid_decider(interest_index=selected_int, lang_index=selected_lang, video_arr=read_interest_video_from_file("./static/interest_vid.txt"))
+            
+            
+            
+            
+        
+        #ELSE run a check on cultural since simiarity on interest failed
+        else:
+            print("******* RELIGIOUS CHECKING ********")
+            #Get info on if has_common_flag, the common_religion, 
+            has_common_rel_flag, religion_index = has_common(ready_index=Ri_index, willing_index=Li_index, subject_arr=agent_culture, start=8, end=12)
+
+            print("******* CULT FEST DATE CHECKING ********")
+            #Get info on cultural dates
+            overlaps_cultural_fest, culture, cult_fest_url = festival_checker(date, read_festivals_from_file("./static/cult_fest.txt"))
+            
+        #   Check if there are similar cultures in group
+        #   If got similar religious culture, do below  
+            print(f"Has Common Religion Flag: {has_common_rel_flag}")
+            print(f"Overlaps with date: {overlaps_cultural_fest}")  
+            print(f"Religion Index: {religion_index}")
+            print(f"Festival Religion: {culture}")    
+            print(f"Matching culture and festival: {check_cult_fest_match(rel_arr=religion_index, fest_index=culture)}")     
+            if(has_common_rel_flag and overlaps_cultural_fest and check_cult_fest_match(rel_arr=religion_index, fest_index=culture)):      
+                contentURL=cult_fest_url
+                
+        #       IF religious festival is on the current date
+        #           play video on cultural festival (3rd Option)
+        #       ELSE
+        #           
+        #   ELSE Check for similar language since religious failed
+            else:
+                contentURL = "Generic Trend due to Failed Culture"
+                if(overlaps_gen_fest):
+                    # If got cultural festival
+                    contentURL = gen_fest_url
+        #       IF got similar language
+        #           play video on trends with common language (4th Final Option)
+                else:
+                    #play genereic trend in general language (5th Final Option)
+                    contentURL = "https://www.youtube.com/embed/tClfHvFqSdU"
+        
+    #ELSE run generic trends:
     else:
-        print("Play trendiest interest rn")
-        Gate5Video = "https://www.youtube.com/watch?v=1-iBQDveqtU"
-        contentURL = Gate5Video
+        if(overlaps_gen_fest):
+            contentURL = gen_fest_url
+        else:
+            #   Run Generic trend in general language
+            contentURL = "https://www.youtube.com/embed/iBQDveqtU"
      
     return contentURL   
 
@@ -526,6 +694,10 @@ async def submit_form(
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
+async def to_home():
+    return RedirectResponse(url=f"/simhome", status_code=303)
+
+@app.get("/simhome")
 async def read_index(request: Request, db: Session = Depends(get_db)):
     
     db_agents = db.query(Agent).all()
@@ -968,6 +1140,7 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
     print(f'Cultural Array: {cluster_interest}')
     print(f'Cultural count: {cluster_culture_count}')
     print(f"Model Output: {cluster_behaviour}")
+    print(f"Cluster Conent Output: {cluster_content}")
     print("")
     print("")
     

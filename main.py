@@ -56,51 +56,8 @@ def translate(input):
         case 4:
             return [0,0,0,1]
 
-def Gate2(date_str, festivals):
-    input_date = datetime.strptime(date_str, "%Y-%m-%d")
-    
-    #Check whole cultural festival dates
-    for festival in festivals:
-        start_date = datetime.strptime(festival.start_date, "%Y-%m-%d")
-        end_date = datetime.strptime(festival.end_date, "%Y-%m-%d")
-        
-        #If it falls on a cultural festival
-        if start_date <= input_date <= end_date: 
-            #Check if that cultural festival has any ready to interact members in this cluster
-            
-                #Does the 
-            return True, festival.video, festival.culture if festival.culture else ""
-    
-    return False, "", ""
-  
-#Check for 3 things    
-def Gate1(agent_behaviour, agent_int, agent_cult, int_count, int_avg, cult_count, cult_avg):
-    
-    flag = False
-    content = ""
-    
-    #Check if there is 2 or more agents willing to interact and check
-    # if((has_extrovert(agent_behaviour=agent_behaviour,type='willing') >= 2) or (has_extrovert(agent_behaviour=agent_behaviour,type='ready') >= 1)):
-        # return flag, content
-        
-    
-    #Check if there are extroverts (Ready to Interact) are present
-    #   If got, check if those extroverts are interested in the 
-    
-    #Check if they speak the same language (culture)
-    #   If they dont, default to eng/bm
-    #   If they do, change content to that language
-    
-    # Ri_index, Li_index = extrovert_index(agent_behaviour=agent_behaviour)
-    # if 
-    
-    
-    
-    return False
-
-
 #Decision Model
-def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_culture, culture_count, interest_arr, culture_arr):
+def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_culture, culture_count, interest_arr, culture_arr, agent_names):
     
     print("")
     print("")
@@ -119,14 +76,17 @@ def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_
     print("")
     print("")
     
-    #Festivities
-    Festival = namedtuple('Festival', ['name','start_date','end_date', 'video', 'culture'])
+    # #Festivities
+    # Festival = namedtuple('Festival', ['name','start_date','end_date', 'video', 'culture'])
     
-    #Interest Video
-    IntVid = namedtuple('IntVid', ['interest','lang','vidURL'])
+    # #Interest Video
+    # IntVid = namedtuple('IntVid', ['interest','lang','vidURL'])
     
     def read_festivals_from_file(file_path): 
+        #Festivities
+        Festival = namedtuple('Festival', ['name','start_date','end_date', 'video', 'culture'])
         festivals = [] 
+        
         with open(file_path, 'r') as file: 
             for line in file: 
                 parts = line.strip().split(',')
@@ -181,7 +141,6 @@ def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_
             
         return "No such video"
         
-
     def AND_func(array1, array2):
         return [a and b for a, b in zip(array1, array2)]
     
@@ -258,14 +217,33 @@ def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_
         return flag, index_of_highest_subj
     
     def check_cult_fest_match(rel_arr, fest_index):
-        print(f"Rel Arr: {rel_arr}")
-        for rel in rel_arr:
-            if(int(rel)==int(fest_index)):
-                return True
+        if(rel_arr!='' and fest_index!=''):
+            print(f"Rel Arr: {rel_arr}")
+            for rel in rel_arr:
+                if(int(rel)==int(fest_index)):
+                    return True
             
         return False
     
+    def agent_name_printer(agent_index, agent_names):
+        out = "| "
+        for i in agent_index:
+            out = out + agent_names[i][0] + " | "
+        print(f"out value: {out}")   
+        return out
+    
+    def index_conv(index_array, name_array):
+        out = "| "
+        print(f"Name Array: {name_array}")
+        for index, i in enumerate(index_array):
+            if(i==1):
+                out = out + name_array[index] + " | "
+        print(f"out value: {out}")
+        return out
+        
+                
     contentURL = ""
+    analysis = ""
     
     #Check if there is an overlap of general festivals
     overlaps_gen_fest, festival_cult, gen_fest_url = festival_checker(date, read_festivals_from_file("./static/gen_fest.txt"))
@@ -274,9 +252,16 @@ def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_
     print(f"Willing: {has_extrovert(agent_behaviour=agent_behaviour, type='willing')}")
     print(f"Ready: {has_extrovert(agent_behaviour=agent_behaviour, type='ready')}")
     
+    analysis = analysis + f"Willing to Interact: {has_extrovert(agent_behaviour=agent_behaviour, type='willing')}\nReady to Intereact: {has_extrovert(agent_behaviour=agent_behaviour, type='ready')}\n"
+    
+    num_of_Li = has_extrovert(agent_behaviour=agent_behaviour, type='willing')
+    num_of_Ri = has_extrovert(agent_behaviour=agent_behaviour, type='ready')
+    
     #If there is agents willing or ready to interact do below: 
-    if((has_extrovert(agent_behaviour=agent_behaviour, type='willing')>= 2) and has_extrovert(agent_behaviour=agent_behaviour, type='ready')>=1):
+    if((num_of_Li>= 2) and (num_of_Ri>=1)):
 
+        analysis = analysis + f"There are {num_of_Li} willing to interact agents and {num_of_Ri} ready to interact agent\n"
+        
         # CONTENT CHECKER
         print("******* CONTENT CHECKING ********")
         lang_index = -1
@@ -287,12 +272,19 @@ def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_
         print(f"Ri Index: {Ri_index}")
         print(f"Li Index: {Li_index}")
         
+        #CREATE FUNCTION TO DECIPHER AGENT INDEX ARRAY
+        analysis = analysis + f"Ri Index: {agent_name_printer(Ri_index, agent_names)}\n"
+        analysis = analysis + f"Li Index: {agent_name_printer(Li_index, agent_names)}\n"
+        
         # LANG CHECKER
         print("******* LANGUAGE CHECKING ********")
         lang_flag, lang_index = has_common(ready_index=Ri_index, willing_index=Li_index, subject_arr=agent_culture, start=0, end=4)
         
         print(f"Language Flag: {lang_flag}")
         print(f"Language Indexes: {lang_index}")
+        
+        language_array = ["English", "Malay", "Mandarin", "Tamil"]
+        analysis = analysis + f"Languages : {index_conv(lang_index, language_array)}"
         
         print("******* INTEREST CHECKING ********")
         has_common_interest_flag, interest_index = has_common(ready_index=Ri_index, willing_index=Li_index, subject_arr=agent_interest)
@@ -330,6 +322,7 @@ def decision_model(date, agent_behaviour, interest_count, agent_interest, agent_
             print(f"Religion Index: {religion_index}")
             print(f"Festival Religion: {culture}")    
             print(f"Matching culture and festival: {check_cult_fest_match(rel_arr=religion_index, fest_index=culture)}")     
+            
             if(has_common_rel_flag and overlaps_cultural_fest and check_cult_fest_match(rel_arr=religion_index, fest_index=culture)):      
                 contentURL=cult_fest_url
                 
@@ -695,7 +688,14 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 async def to_home():
-    return RedirectResponse(url=f"/simhome", status_code=303)
+    return RedirectResponse(url="/simhome", status_code=303)
+
+@app.post("/reset")
+async def reset():
+    agents_list.clear()
+    tv_positions.clear()
+    
+    return RedirectResponse(url="/simhome", status_code=303)
 
 @app.get("/simhome")
 async def read_index(request: Request, db: Session = Depends(get_db)):
@@ -851,7 +851,7 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
     cluster_culture_count = []
     cluster_behaviour = []
     cluster_content = []        # [ Content_Cluster_1, Content_Cluster_2, ...] // Content_Cluster_1 = ["PAth_of_video.mp4"]
-       
+    cluster_details = []   
     
      
     #Runs Each Cluster Differently
@@ -907,7 +907,7 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
         #adjust the agent_array by tweaking the Ni and Nc Values
         print("Attempt Asjustment on Ni and Nc")
         print(f"Agent array SSIC Model: {agent_array}")
-        print(f"Clustuer culture: {cluster_culture}")
+        print(f"Cluster culture: {cluster_culture}")
         print(f"Cluster Interest: {cluster_interest}")
         for index, agent in enumerate(agent_array):
             agent[7] = cluster_culture[tv][index]
@@ -938,14 +938,8 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
         print("---- Extracting Final SSIC Model Data ----")
         for index in range(len(Pa)):
             agent_behaviour.append([
-                # Pa[index][-1],   #Pa  - Positive Affect
-                # Si[index][-1],   #Si  - Short-Term Willingness to Interact
                 Ri[index][-1],   #Ri  - Readiness to Interact
-                # Dh[index][-1],   #Dh  - Dynamic Happiness
-                # Ds[index][-1],   #Ds  - Dynamic Sadness
-                # Df[index][-1],   #Df  - Dynamic Fear
                 Li[index][-1],   #Li  - Long-Term Willingness to Interact
-                # Psi[index][-1],   #Psi - Experienced Fear
             ])
         cluster_behaviour.append(agent_behaviour)
         print("---- Finish Extraction ----")
@@ -966,7 +960,8 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
                        interest_count=count_int, 
                        interest_arr=or_sim,
                        culture_count=count_cult,
-                       culture_arr=or_cult)
+                       culture_arr=or_cult,
+                       agent_names=agent_name)
             )
         print("---- Decision model finished ----")
 
@@ -1155,6 +1150,9 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
     print("")
     print("")
     print("")
+    
+    print(image_urls)
+    print(cluster_content)
     
     # Render the result.html template with the image URLs
     return templates.TemplateResponse("result.html", {"request": request, "image_urls": image_urls, "interests": cluster_interest, "culture": cluster_culture, "content": cluster_content})

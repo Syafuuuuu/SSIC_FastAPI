@@ -1,0 +1,60 @@
+.sidebar {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #00000045;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.sidebar a {
+    padding: 15px 25px;
+    text-decoration: none;
+    font-size: 1.2em;
+    color: #a8a8a8;
+    display: block;
+}
+
+.sidebar .active {
+    color: #86ffb6;
+}
+
+.sidebar a:hover {
+    color: #ffffff;
+}
+
+.main-content {
+    margin-left: 210px;
+    padding: 20px;
+}
+
+body {
+    background-size: cover;
+    background-image: url('/static/bgimage.png');
+}
+
+.main-card {
+    background-color: #ffffff40;
+    border-radius: 3%;
+}
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    border-radius: 3%;
+    padding: 15px;
+}
+
+.card-header,
+.card-body {
+    padding: 15px;
+}
+
+.form-group,
+.list-group-item {
+    margin-bottom: 10px;
+}

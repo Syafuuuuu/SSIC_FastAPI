@@ -6,56 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Simulation</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/sidebar.css">
     <style>
-        .container {
-            padding: 20px;
-        }
-
-        .card {
-            padding: 15px;
-        }
-
-        .card-header,
-        .card-body {
-            padding: 15px;
-        }
-
-        .form-group,
-        .list-group-item {
-            margin-bottom: 10px;
-        }
-
-        .sidebar {
-            height: 100%;
-            width: 200px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background-color: #1a1a1a;
-            overflow-x: hidden;
-            padding-top: 20px;
-        }
-
-        .sidebar a {
-            padding: 15px 25px;
-            text-decoration: none;
-            font-size: 1.2em;
-            color: #a8a8a8;
-            display: block;
-        }
-
-        .sidebar .active {
-            color: #86ffb6;
-        }
-
-        .sidebar a:hover {
-            color: #ffffff;
-        }
-
-        .main-content {
-            margin-left: 210px;
-            padding: 20px;
-        }
     </style>
 </head>
 
@@ -79,8 +31,8 @@
                 <br><br>
             </div>
 
-            <div class="card">
-                <h1 class="text-center mb-4">Agent Simulation</h1>
+            <div class="card main-card">
+                <h1 class="text-center mb-4" style="color: white;">Agent Simulation</h1>
 
                 <div class="row">
                     <!-- Left Column: Display Plot (taking up half the screen width) -->
@@ -159,6 +111,7 @@
                         </div>
                     </div>
 
+
                     <!-- Right Column: Agent List (taking up one-fourth of the screen width) -->
                     <div class="col-md-3 mb-4">
                         <div class="card">
@@ -175,6 +128,9 @@
                                     {% endif %}
                                 </ul>
                             </div>
+                            <form method="POST" action="/reset">
+                                <button type="submit" class="btn btn-warning btn-block">Reset</button>
+                            </form>
                         </div>
                     </div>
                 </div>

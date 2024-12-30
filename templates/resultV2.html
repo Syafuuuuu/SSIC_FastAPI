@@ -4,12 +4,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Simulation</title>
+    <title>Simulation Results</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="./static/sidebar.css">
     <link rel="stylesheet" href="./static/result.css">
-    <style>
-    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const clusterData = JSON.parse(document.getElementById("cluster-data").textContent);
+            const totalClusters = clusterData.length;
+            let currentCluster = 0;
+
+            const updateClusterDisplay = () => {
+                const cluster = clusterData[currentCluster];
+                document.getElementById("cluster-title").textContent = `Cluster ${currentCluster + 1} of ${totalClusters}`;
+                document.getElementById("cluster-content").src = cluster.content;
+
+                // Update images
+                const images = document.getElementById("cluster-images");
+                images.innerHTML = `
+                    <tr>
+                        <td><img src="${cluster.images[0]}" alt="3D Temporal Factors"></td>
+                        <td><img src="${cluster.images[1]}" alt="3D Instantaneous Factors"></td>
+                    </tr>
+                    <tr>
+                        <td><img src="${cluster.images[2]}" alt="2D Temporal Factors"></td>
+                        <td><img src="${cluster.images[3]}" alt="2D Instantaneous Factors"></td>
+                    </tr>
+                `;
+
+                // Extract agent names from agent_name array
+                const agentNames = cluster.agent_name.map((agent) => `<th>${agent[0]}</th>`).join("");
+
+                // Update agent names and interests table
+                const interests = cluster.interests.map((interest) => `<td>${interest}</td>`).join("");
+                document.getElementById("cluster-interests").innerHTML = `
+                    <thead>
+                        <tr>${agentNames}</tr>
+                    </thead>
+                    <tbody>
+                        <tr>${interests}</tr>
+                    </tbody>
+                `;
+
+                // Update agent names and cultures table
+                const cultures = cluster.cultures.map((culture) => `<td>${culture}</td>`).join("");
+                document.getElementById("cluster-cultures").innerHTML = `
+                    <thead>
+                        <tr>${agentNames}</tr>
+                    </thead>
+                    <tbody>
+                        <tr>${cultures}</tr>
+                    </tbody>
+                `;
+            };
+
+            document.getElementById("prev-btn").addEventListener("click", () => {
+                if (currentCluster > 0) {
+                    currentCluster--;
+                    updateClusterDisplay();
+                }
+            });
+
+            document.getElementById("next-btn").addEventListener("click", () => {
+                if (currentCluster < totalClusters - 1) {
+                    currentCluster++;
+                    updateClusterDisplay();
+                }
+            });
+
+            // Initialize display
+            updateClusterDisplay();
+        });
+    </script>
+
+
 </head>
 
 <body class="bg-dark">
@@ -21,58 +89,38 @@
     <div class="main-content">
         <div class="container mt-5">
             <div class="main-head">
-                <h1>Simulation Results</h1>
-                <p>Below are the generated graphs from the simulation:</p>
+                <h1 id="cluster-title">Simulation Results</h1>
             </div>
 
-
-
-            <!-- Goes into Each Cluster where i is the cluster index-->
-            {% for i in range(image_urls|length) %}
             <div class="card">
                 <div class="card-header">
-                    <h1>Cluster {{ i+1 }}</h1>
+                    <h2>Cluster Details</h2>
                 </div>
                 <div>
-                    <iframe width="100%" height="400" src="{{ content[i] }}">
-                    </iframe>
+                    <iframe id="cluster-content" width="100%" height="400" frameborder="0"></iframe>
                 </div>
                 <div class="card-body">
-                    <table>
-                        <tr>
-                            <td><img src="{{ image_urls[i][0] }}" alt="Simulation Graph"></td>
-                            <td><img src="{{ image_urls[i][1] }}" alt="Simulation Graph"></td>
-                        </tr>
-                        <tr>
-                            <td><img src="{{ image_urls[i][2] }}" alt="Simulation Graph"></td>
-                            <td><img src="{{ image_urls[i][3] }}" alt="Simulation Graph"></td>
-                        </tr>
-                    </table>
+                    <table id="cluster-images"></table>
 
-                    <table>
-                        <tr>
-                            {% for j in range(interests[i]|length) %}
-                            <th>Agent {{ j+1 }}</th>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            {% for j in range(interests[i]|length) %}
-                            <th>{{ interests[i][j] }}</th>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            {% for j in range(culture[i]|length) %}
-                            <th>{{ culture[i][j] }}</th>
-                            {% endfor %}
-                        </tr>
-                    </table>
+                    <h4>Agent Interests</h4>
+                    <table id="cluster-interests"></table>
+
+                    <h4>Agent Cultural Values</h4>
+                    <table id="cluster-cultures"></table>
                 </div>
             </div>
-            <br><br><br>
-            {% endfor %}
 
+            <div class="navigation mt-4">
+                <button id="prev-btn" class="btn btn-primary">Previous Cluster</button>
+                <button id="next-btn" class="btn btn-primary">Next Cluster</button>
+            </div>
         </div>
     </div>
+
+    <!-- Hidden div to pass data -->
+    <script type="application/json" id="cluster-data">
+        {{ cluster_data | tojson }}
+    </script>
 </body>
 
 </html>

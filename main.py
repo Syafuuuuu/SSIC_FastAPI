@@ -697,6 +697,22 @@ async def reset():
     
     return RedirectResponse(url="/simhome", status_code=303)
 
+@app.post("/preset1")
+async def preset1():
+    agents_list.append(["Indian1",7,8])
+    agents_list.append(["Indian2",8,8])
+    agents_list.append(["Indian3",8,7])
+    agents_list.append(["All Tick",6,7])
+    agents_list.append(["All Tick",7,6])
+    tv_positions.append(["TV-1",7,7])
+    
+    agents_list.append(["Aqil",2,1])
+    agents_list.append(["Syafiq",1,1])
+    agents_list.append(["Suchira",1,2])
+    tv_positions.append(["TV-2",2,2])
+    
+    return RedirectResponse(url="/simhome", status_code=303)
+
 @app.get("/simhome")
 async def read_index(request: Request, db: Session = Depends(get_db)):
     
@@ -845,6 +861,7 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
     image_urls = []             # [ Image_URL_Cluster_1, Image_URL_Cluster_2 ... ] // Image_URL_Cluster_1 = [Image1, Image2, Image3, ..]
     
     #Average Values per Agent
+    cluster_names = []
     cluster_interest = []       # [ Interest_Cluster_1, Interest_Cluster_2, ... ] // Interest_Cluster_1 = []
     cluster_interest_count = []
     cluster_culture = []        # [ Culture_Cluster_1, Culture_Cluster_2, ... ] // Culture_Cluster_1 = []
@@ -885,6 +902,8 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
         # print(agent_array)    
         print("---- Unpacking Compelete ----")
         print("")   
+        
+        cluster_names.append(agent_name)
         
         #-------------------------- Interest Similarities -----------------------------------------
         print("---- Similarity and Model Adjustment ----")
@@ -1135,7 +1154,9 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
     print(f'Cultural Array: {cluster_interest}')
     print(f'Cultural count: {cluster_culture_count}')
     print(f"Model Output: {cluster_behaviour}")
+    print(f'Image URLS: {image_urls}')
     print(f"Cluster Conent Output: {cluster_content}")
+    print(f'Agent Names: {simulation_agents_name}')
     print("")
     print("")
     
@@ -1155,8 +1176,21 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
     print(cluster_content)
     
     # Render the result.html template with the image URLs
-    return templates.TemplateResponse("result.html", {"request": request, "image_urls": image_urls, "interests": cluster_interest, "culture": cluster_culture, "content": cluster_content})
-
+    # return templates.TemplateResponse("resultV2.html", {"request": request, "image_urls": image_urls, "interests": cluster_interest, "culture": cluster_culture, "content": cluster_content, "cluster_num": len(cluster_content)})
+    return templates.TemplateResponse("resultV2.html", {
+        "request": request,
+        "total_clusters": len(image_urls),
+        "cluster_data": [
+            {
+                "content": cluster_content[i],
+                "images": image_urls[i],
+                "agent_name": cluster_names[i],
+                "interests": cluster_interest[i],
+                "cultures": cluster_culture[i],  # Example; replace with actual cultural data
+            }
+            for i in range(len(image_urls))
+        ],
+    })
 #endregion
 
 # Static files setup (optional, depending on where your CSS/JS resides)

@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agent Simulation for Stranger Social Interaction Catalyst (SSIC) Model">
+    <link rel="favicon" href="./static/favicon.ico">
     <title>Agent Simulation</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="./static/sidebar.css">
-    <style>
-    </style>
+    <link rel="stylesheet" href="./static/main.css">
 </head>
 
 <body class="bg-dark">
@@ -63,18 +64,20 @@
                                     <div class="form-group row">
                                         <label for="tv_x" class="col-sm-5 col-form-label">TV X-coordinate:</label>
                                         <div class="col-sm-7">
-                                            <input type="number" name="tv_x" id="tv_x" value="7" required
-                                                class="form-control">
+                                            <input type="number" name="tv_x" id="tv_x" value="7" required min="0"
+                                                max="10" class="form-control">
                                         </div>
                                     </div>
                                     <div class="form-group row">
                                         <label for="tv_y" class="col-sm-5 col-form-label">TV Y-coordinate:</label>
                                         <div class="col-sm-7">
-                                            <input type="number" name="tv_y" id="tv_y" value="7" required
-                                                class="form-control">
+                                            <input type="number" name="tv_y" id="tv_y" value="7" required min="0"
+                                                max="10" class="form-control">
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-success btn-block">Add Television</button>
+                                    <button type="submit" class="btn btn-success btn-block"
+                                        onclick="this.disabled=true;this.innerHTML='Adding...';this.form.submit();">Add
+                                        Television</button>
                                 </form>
                             </div>
                         </div>
@@ -96,16 +99,18 @@
                                     <div class="form-row">
                                         <div class="form-group col-md-6">
                                             <label for="posX">Agent X-coordinate:</label>
-                                            <input type="number" name="posX" id="posX" value="7" required
-                                                class="form-control">
+                                            <input type="number" name="posX" id="posX" value="7" required min="0"
+                                                max="10" class="form-control">
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label for="posY">Agent Y-coordinate:</label>
-                                            <input type="number" name="posY" id="posY" value="7" required
-                                                class="form-control">
+                                            <input type="number" name="posY" id="posY" value="7" required min="0"
+                                                max="10" class="form-control">
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary btn-block">Add Agent</button>
+                                    <button type="submit" class="btn btn-primary btn-block"
+                                        onclick="this.disabled=true;this.innerHTML='Adding...';this.form.submit();">Add
+                                        Agent</button>
                                 </form>
                             </div>
                         </div>
@@ -128,7 +133,8 @@
                                     {% endif %}
                                 </ul>
                             </div>
-                            <form method="POST" action="/reset">
+                            <form method="POST" action="/reset"
+                                onsubmit="return confirm('Are you sure you want to reset? This will remove all agents and TVs.');">
                                 <button type="submit" class="btn btn-warning btn-block">Reset</button>
                             </form>
                         </div>

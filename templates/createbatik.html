@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Agent Simulation for Stranger Social Interaction Catalyst (SSIC) Model">
+    <link rel="favicon" href="./static/favicon.ico">
+    <title>Agent Simulation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/sidebar.css">
+    <link rel="stylesheet" href="./static/main.css">
+</head>
+
+<style>
+    .create-batik-container {
+        background-color: rgba(255, 255, 255, 1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        align-items: center;
+    }
+
+    .header-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-self: stretch;
+        position: relative;
+        min-height: 125px;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        padding: 37px 70px;
+    }
+
+    .header-background {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .navigation {
+        position: relative;
+        border-radius: 45px;
+        background-color: rgba(255, 255, 255, 1);
+        box-shadow: 0px 4px 4px 3px rgba(0, 0, 0, 0.25);
+        display: flex;
+        width: 1216px;
+        max-width: 100%;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 12px 73px;
+    }
+
+    .brand-name {
+        font: 20px Lobster, sans-serif;
+    }
+
+    .brand-highlight {
+        color: rgba(255, 204, 0, 1);
+    }
+
+    .nav-links {
+        align-self: start;
+        display: flex;
+        margin-top: 10px;
+        gap: 40px 100px;
+        font: 16px Mirza, sans-serif;
+    }
+
+    .main-title {
+        color: rgba(0, 0, 0, 1);
+        text-align: center;
+        margin-top: 50px;
+        font: 400 20px Mirza, sans-serif;
+    }
+
+    .record-controls {
+        display: flex;
+        margin-top: 22px;
+        width: 90px;
+        gap: 20px;
+        justify-content: space-between;
+    }
+
+    .control-icon {
+        aspect-ratio: 0.97;
+        object-fit: contain;
+        object-position: center;
+        width: 31px;
+    }
+
+    .audio-display {
+        display: flex;
+        margin-top: 12px;
+        width: 164px;
+        max-width: 100%;
+    }
+
+    .audio-icon {
+        aspect-ratio: 1;
+        object-fit: contain;
+        object-position: center;
+        width: 30px;
+        margin: auto 0;
+    }
+
+    .waveform {
+        aspect-ratio: 1.72;
+        object-fit: contain;
+        object-position: center;
+        width: 134px;
+        max-width: 100%;
+    }
+
+    .upload-button {
+        align-self: stretch;
+        border-radius: 30px;
+        background-color: rgba(255, 255, 255, 1);
+        margin-top: 12px;
+        min-height: 32px;
+        width: 148px;
+        max-width: 100%;
+        gap: 10px;
+        color: rgba(0, 0, 0, 1);
+        white-space: nowrap;
+        padding: 11px 10px 5px;
+        font: 400 13px Mirza, sans-serif;
+        border: 1px solid rgba(255, 226, 108, 1);
+        cursor: pointer;
+    }
+
+    .footer-section {
+        background-color: rgba(255, 242, 188, 1);
+        align-self: stretch;
+        display: flex;
+        margin-top: 393px;
+        width: 100%;
+        flex-direction: column;
+        align-items: end;
+        color: rgba(0, 0, 0, 1);
+        font-weight: 400;
+        padding: 53px 80px;
+    }
+
+    .footer-content {
+        display: flex;
+        width: 100%;
+        max-width: 1218px;
+        align-items: flex-start;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .footer-brand {
+        align-self: end;
+        margin-top: 24px;
+        font: 48px Lobster, sans-serif;
+    }
+
+    .contact-wrapper {
+        align-self: start;
+        display: flex;
+        gap: 6px;
+        font-family: Mirza, sans-serif;
+    }
+
+    .location-icon {
+        aspect-ratio: 1;
+        object-fit: contain;
+        object-position: center;
+        width: 17px;
+        align-self: end;
+        margin-top: 47px;
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        flex-basis: 0;
+        width: fit-content;
+    }
+
+    .contact-title {
+        font-size: 20px;
+        align-self: end;
+    }
+
+    .contact-address {
+        font-size: 16px;
+        text-align: right;
+        margin-top: 30px;
+    }
+
+    .email-wrapper {
+        display: flex;
+        margin-top: 4px;
+        gap: 10px;
+        white-space: nowrap;
+        text-align: right;
+        font: 16px Mirza, sans-serif;
+    }
+
+    .email-icon {
+        aspect-ratio: 1.47;
+        object-fit: contain;
+        object-position: center;
+        width: 25px;
+        align-self: start;
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+    }
+
+    @media (max-width: 991px) {
+        .header-wrapper {
+            max-width: 100%;
+            padding: 0 20px;
+        }
+
+        .navigation {
+            padding: 0 20px;
+        }
+
+        .nav-links {
+            max-width: 100%;
+        }
+
+        .main-title {
+            margin-top: 40px;
+        }
+
+        .upload-button {
+            white-space: initial;
+        }
+
+        .footer-section {
+            max-width: 100%;
+            margin-top: 40px;
+            padding: 0 20px;
+        }
+
+        .footer-content {
+            max-width: 100%;
+        }
+
+        .footer-brand {
+            font-size: 40px;
+        }
+
+        .location-icon {
+            margin-top: 40px;
+        }
+
+        .email-wrapper {
+            white-space: initial;
+        }
+    }
+</style>
+
+<body class="bg-dark">
+
+    <div class="create-batik-container">
+        <div class="header-wrapper">
+            <img loading="lazy"
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/ee46a1aa4e98dfff5983fb9be13db2980e3a71cce702c28f5e7b69195fe6bf29?placeholderIfAbsent=true&apiKey=bd51f4bee52a4afd940732a709aa58a5"
+                class="header-background" alt="" />
+            <nav class="navigation">
+                <div class="brand-name">
+                    <span class="brand-highlight">Voice</span>Craft
+                </div>
+                <div class="nav-links">
+                    <a href="#" tabindex="0">Home</a>
+                    <a href="#" tabindex="0">Batik Directory</a>
+                    <a href="#" tabindex="0">Create Batik</a>
+                    <a href="#" tabindex="0">About</a>
+                </div>
+            </nav>
+        </div>
+        <h1 class="main-title">
+            Get Your Batik Pattern Here
+            <br />
+            <br />
+            Please record your voice
+        </h1>
+        <div class="record-controls">
+            <img loading="lazy"
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/425cfd1ed74afcf70ea295945fa4a8caec886f4a273a3170231ca4595ce99249?placeholderIfAbsent=true&apiKey=bd51f4bee52a4afd940732a709aa58a5"
+                class="control-icon" alt="Start recording" role="button" tabindex="0" />
+            <img loading="lazy"
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/dc7e5aff24364b2373eb7ca67b5a118eae1fa924ebf469ca60d6cad8d007dab7?placeholderIfAbsent=true&apiKey=bd51f4bee52a4afd940732a709aa58a5"
+                class="control-icon" alt="Stop recording" role="button" tabindex="0" />
+        </div>
+        <div class="audio-display">
+            <img loading="lazy"
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/e08a9336d3d535a3a1ccd535b69a0a16ae7e6a8ad4ba6402b46685eb351acc39?placeholderIfAbsent=true&apiKey=bd51f4bee52a4afd940732a709aa58a5"
+                class="audio-icon" alt="Audio visualization" />
+            <img loading="lazy"
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/dde2e32e8e0e5ae131aa009aff487ac43f263aea791f3e7d17202e7f12eb8c98?placeholderIfAbsent=true&apiKey=bd51f4bee52a4afd940732a709aa58a5"
+                class="waveform" alt="Audio waveform" />
+        </div>
+        <button class="upload-button" tabindex="0">UPLOAD</button>
+        <footer class="footer-section">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="brand-highlight">Voice</span>Craft
+                </div>
+                <div class="contact-wrapper">
+                    <img loading="lazy"
+                        src="https://cdn.builder.io/api/v1/image/assets/TEMP/4c7de8997d10d47adabdd67c85e88120eb7ad829113298c0b0f2960bd7faa2d6?placeholderIfAbsent=true&apiKey=bd51f4bee52a4afd940732a709aa58a5"
+                        class="location-icon" alt="Location icon" />
+                    <div class="contact-info">
+                        <div class="contact-title">Contact us</div>
+                        <div class="contact-address">
+                            School of Computing, Universiti Utara Malaysia
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="email-wrapper">
+                <img loading="lazy"
+                    src="https://cdn.builder.io/api/v1/image/assets/TEMP/12abcadc9d6979301fcd012b07fe8395cd8c84bc746d2113c1dc0d7d9fd3be6a?placeholderIfAbsent=true&apiKey=bd51f4bee52a4afd940732a709aa58a5"
+                    class="email-icon" alt="Email icon" />
+                <a href="mailto:chira2072002@outlook.com" tabindex="0">chira2072002@outlook.com</a>
+            </div>
+        </footer>
+    </div>
+</body>

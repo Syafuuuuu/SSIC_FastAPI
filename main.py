@@ -1186,7 +1186,10 @@ async def simulate(request: Request, db: Session = Depends(get_db), date: str = 
                 "images": image_urls[i],
                 "agent_name": cluster_names[i],
                 "interests": cluster_interest[i],
+                "hobb_count":cluster_interest_count[i][:6],
+                "int_count" : cluster_interest_count[i][6:],
                 "cultures": cluster_culture[i],  # Example; replace with actual cultural data
+                "cult_count" : cluster_culture_count[i],
             }
             for i in range(len(image_urls))
         ],

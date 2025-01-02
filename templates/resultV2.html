@@ -8,6 +8,46 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="./static/sidebar.css">
     <link rel="stylesheet" href="./static/result.css">
+    <style>
+        .cluster-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 10%;
+        }
+
+        .cluster-table th,
+        .cluster-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .cluster-table th {
+            text-align: center;
+            background-color: #3b2524;
+            color: white;
+        }
+
+        .cluster-table td {
+            text-align: center;
+        }
+
+        #image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+    </style>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const clusterData = JSON.parse(document.getElementById("cluster-data").textContent);
@@ -19,44 +59,120 @@
                 document.getElementById("cluster-title").textContent = `Cluster ${currentCluster + 1} of ${totalClusters}`;
                 document.getElementById("cluster-content").src = cluster.content;
 
-                // Update images
                 const images = document.getElementById("cluster-images");
-                images.innerHTML = `
+                images.innerHTML = cluster.images
+                    .map((image) => `<td class="clickable-td"><img src="${image}" alt="Simulation Graph"></td>`)
+                    .join("");
+
+
+                // Agent Overlap Table
+                const agentOverlapTableHead = `
                     <tr>
-                        <td><img src="${cluster.images[0]}" alt="3D Temporal Factors"></td>
-                        <td><img src="${cluster.images[1]}" alt="3D Instantaneous Factors"></td>
+                        <th>Agent</th>
+                        ${cluster.agent_name.map((agent) => `<th>${agent[0]}</th>`).join("")}
+                    </tr>
+                `;
+
+                const agentOverlapTableBody = `
+                    <tr>
+                        <td>Interest</td>
+                        ${cluster.interests.map((interest) => `<td>${interest}</td>`).join("")}
                     </tr>
                     <tr>
-                        <td><img src="${cluster.images[2]}" alt="2D Temporal Factors"></td>
-                        <td><img src="${cluster.images[3]}" alt="2D Instantaneous Factors"></td>
+                        <td>Culture</td>
+                        ${cluster.cultures.map((culture) => `<td>${culture}</td>`).join("")}
                     </tr>
                 `;
 
-                // Extract agent names from agent_name array
-                const agentNames = cluster.agent_name.map((agent) => `<th>${agent[0]}</th>`).join("");
+                document.getElementById("agent-overlap-table").innerHTML = agentOverlapTableHead + agentOverlapTableBody;
 
-                // Update agent names and interests table
-                const interests = cluster.interests.map((interest) => `<td>${interest}</td>`).join("");
-                document.getElementById("cluster-interests").innerHTML = `
-                    <thead>
-                        <tr>${agentNames}</tr>
-                    </thead>
-                    <tbody>
-                        <tr>${interests}</tr>
-                    </tbody>
+                // Hobby Count
+                const hobbCountHead = `
+                <tr>
+                    <th>Hobbies</th>
+                    <th>Cognitive</th>
+                    <th>Cultural</th>
+                    <th>Religious</th>
+                    <th>Social</th>
+                    <th>Gardening</th>
+                    <th>Travelling</th>
+                </tr>
+                
                 `;
 
-                // Update agent names and cultures table
-                const cultures = cluster.cultures.map((culture) => `<td>${culture}</td>`).join("");
-                document.getElementById("cluster-cultures").innerHTML = `
-                    <thead>
-                        <tr>${agentNames}</tr>
-                    </thead>
-                    <tbody>
-                        <tr>${cultures}</tr>
-                    </tbody>
+                const hobbCountBody = `
+                <tr>
+                    <td>Count</td>
+                    ${cluster.hobb_count.map((hobby) => `<td>${hobby}</td>`).join("")}
+                </tr>
+                
                 `;
+
+                document.getElementById("hobb-count-table").innerHTML = hobbCountHead + hobbCountBody
+
+                // Interest Count
+                const intCountHead = `
+                <tr>
+                    <th>Interest</th>
+                    <th>Realistic</th>
+                    <th>Investigativel</th>
+                    <th>Artistic</th>
+                    <th>Social</th>
+                    <th>Enterprising</th>
+                    <th>Conventional</th>
+                </tr>
+                
+                `;
+
+                const intCountBody = `
+                <tr>
+                    <td>Count</td>
+                    ${cluster.int_count.map((intcount) => `<td>${intcount}</td>`).join("")}
+                </tr>
+                
+                `;
+
+                document.getElementById("int-count-table").innerHTML = intCountHead + intCountBody
+
+                // Culture Count
+                const cultCountHead = `
+                <tr>
+                    <th>Culture</th>
+                    <th colspan="4">Langauge</th>
+                    <th colspan="4">Race</th>
+                    <th colspan="4">Religion</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>English</th>
+                    <th>Malay</th>
+                    <th>Mandarin</th>
+                    <th>Tamil</th>
+                    <th>Malay</th>
+                    <th>Chinese</th>
+                    <th>Indian</th>
+                    <th>Others</th>
+                    <th>Islam</th>
+                    <th>Christianity</th>
+                    <th>Buddhism</th>
+                    <th>Hinduism</th>    
+                </tr>
+                
+                `;
+
+                const cultCountBody = `
+                <tr>
+                    <td>Count</td>
+                    ${cluster.cult_count.map((cultcount) => `<td>${cultcount}</td>`).join("")}
+                </tr>
+                
+                `;
+
+                document.getElementById("cult-count-table").innerHTML = cultCountHead + cultCountBody
             };
+
+
+            //Button Movement
 
             document.getElementById("prev-btn").addEventListener("click", () => {
                 if (currentCluster > 0) {
@@ -72,10 +188,24 @@
                 }
             });
 
-            // Initialize display
+            const modal = document.getElementById("image-modal");
+            const modalImg = modal.querySelector("img");
+
+            document.addEventListener("click", (event) => {
+                if (event.target.closest(".clickable-td img")) {
+                    modalImg.src = event.target.src;
+                    modal.style.display = "flex";
+                } else if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+
             updateClusterDisplay();
         });
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
 
 </head>
@@ -84,7 +214,7 @@
     <div class="sidebar">
         <a href="/simhome">Home</a>
         <a href="/register">Register</a>
-        <a href="/result" class="active">Result</a>
+        <a class="active">Result</a>
     </div>
     <div class="main-content">
         <div class="container mt-5">
@@ -94,19 +224,29 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2>Cluster Details</h2>
+                    <h2>Cluster Output</h2>
                 </div>
+
                 <div>
                     <iframe id="cluster-content" width="100%" height="400" frameborder="0"></iframe>
                 </div>
-                <div class="card-body">
-                    <table id="cluster-images"></table>
-
-                    <h4>Agent Interests</h4>
-                    <table id="cluster-interests"></table>
-
-                    <h4>Agent Cultural Values</h4>
-                    <table id="cluster-cultures"></table>
+                <br><br>
+                <button type="button" data-toggle="collapse" data-target="#details">Further Details</button>
+                <div id="details" class="collapse card-body">
+                    <h4>Images</h4>
+                    <table id="cluster-images" class="cluster-table"></table>
+                    <br><br>
+                    <h4>Agent Overlap Data</h4>
+                    <table id="agent-overlap-table" class="cluster-table"></table>
+                    <br><br>
+                    <h4>Interest Count</h4>
+                    <table id="int-count-table" class="cluster-table"></table>
+                    <br><br>
+                    <h4>Hobbies Count</h4>
+                    <table id="hobb-count-table" class="cluster-table"></table>
+                    <br><br>
+                    <h4>Culture Count</h4>
+                    <table id="cult-count-table" class="cluster-table"></table>
                 </div>
             </div>
 
@@ -117,7 +257,10 @@
         </div>
     </div>
 
-    <!-- Hidden div to pass data -->
+    <div id="image-modal">
+        <img src="" alt="Modal View">
+    </div>
+
     <script type="application/json" id="cluster-data">
         {{ cluster_data | tojson }}
     </script>
